@@ -1,7 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const {sequelize} = require('../models');
+// const {sequelize} = require('../models');
 const midware = require('../middlewares/middles')
+
+//추가한 부분
+const mysql = require('mysql');
+const util = require('util');
+const sequelize = mysql.createPool({
+    connectionLimit: 10,
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE
+});
+sequelize.query = util.promisify(sequelize.query);
+
 
 //댓글 작성
 router.post('/:postId',midware ,async (req, res) => {
