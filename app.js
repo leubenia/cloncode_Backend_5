@@ -10,7 +10,7 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const Router = require("./routers/index");
+const Router = require("./routers");
 app.use("/api", [Router]);
 
 app.listen(port, () => {
