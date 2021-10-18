@@ -15,28 +15,17 @@ const midware = require('../middlewares/middles')
 // });
 // sequelize.query = util.promisify(sequelize.query);
 
-//댓글 조회
-router.get('/:postId',midware ,async (req, res) => {
-    try {
-      const { postId } = req.params;
-      const {comment} = req.body;
-      const user = res.locals.user;
-      const iscomment = {
-        comment : comment,
-        postId : postId,
-        userId : user.Id,
-      }
-      const post = 'INSERT INTO comment set ?;';
-      await sequelize.query(post, iscomment);
-      
-      res.status(200).send({ result: 'success'});
-    } catch (error) {
-      res.status(400).send({
-        errorMessage: '전체 게시글 조회에 실패했습니다.',
-        result:'fail'
-      });
-    }
-});
+function commentget(num) {
+    const post = 'select * from comments where postId = :postId;';
+    const comments = await sequelize.query(post, {
+        replacements: { 
+            postId : num
+        },
+            type: sequelize.QueryTypes.SELECT
+        }
+        );
+    return comments;
+}
 
 
 
@@ -113,3 +102,4 @@ router.patch('/:commentId',midware ,async (req, res) => {
     }
 });
 module.exports = router;
+module.exports = {commentget};
