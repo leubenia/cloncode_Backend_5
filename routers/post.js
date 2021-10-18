@@ -20,11 +20,10 @@ storage: multerS3({
     bucket: '', 
     acl: 'public-read-write',
     key(req, file, cb) {
-        cb(null, ``);
+        cb(null, `original/${Date.now()}${path.basename(file.originalname)}`);
     },
-     
 }),
-limits: { fileSize: 1000 * 1000 * 10 }, 
+limits: { fileSize: 5 * 1024 * 1024 }, 
 });
 
 // 게시글 등록 
@@ -51,7 +50,7 @@ router.put('/:postId', authMiddleware, async (req, res) => {
         const beforeImage = postInfo.image.split('/')[4];
         s3.deleteObject(
           {
-            Bucket: 'stravinestbucket',
+            Bucket: '',
             Key: `original/${beforeImage}`,
           },
           (err, data) => {
@@ -60,7 +59,7 @@ router.put('/:postId', authMiddleware, async (req, res) => {
         );
         s3.deleteObject(
           {
-            Bucket: 'stravinestbucket',
+            Bucket: '',
             Key: `thumb/${beforeImage}`,
           },
           (err, data) => {
@@ -137,14 +136,14 @@ router.put('/:postId', authMiddleware, upload.single('image'), async (req, res) 
     const s3 = new AWS.S3(); 
     const postId = req.params.postId;
     const { userId } = res.locals.user; 
-    const { title, content } = req.body;
+    const { content } = req.body;
     if (req.file) {
         const postInfo = await Posts.findOne({ where: { postId, userId } });
         if (postInfo) {
         const beforeImage = postInfo.image.split('/')[4];
 
         s3.deleteObject({
-            Bucket: 'stravinestbucket',
+            Bucket: '',
             Key: `original/${beforeImage}`,
             },
             (err, data) => {
@@ -152,7 +151,7 @@ router.put('/:postId', authMiddleware, upload.single('image'), async (req, res) 
             }
         );
         s3.deleteObject({
-            Bucket: 'stravinestbucket',
+            Bucket: '',
             Key: `thumb/${beforeImage}`,
             },
             (err, data) => {
