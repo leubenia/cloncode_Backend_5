@@ -4,7 +4,7 @@ const { users } = require("../models");
 module.exports = (req, res, next) => {
   try {
     //헤더 제거 필요함 -> 세션스토리지말고 쿠키 활용방향으로 미들웨어 적용 필요함
-    const authorization = req.headers.X - AUTH - TOKEN;
+    const authorization = req.headers.X-AUTH-TOKEN;
 
     if (authorization) {
       //   res.status(401).send({

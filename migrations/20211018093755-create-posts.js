@@ -19,7 +19,7 @@ module.exports = {
       },
       content: {
         allowNull: false,
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
       },
       userName: {
         allowNull: false,
@@ -27,7 +27,7 @@ module.exports = {
       },
       insertDt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: Sequelize.STRING,
       },
       image: {
         type: Sequelize.STRING,

@@ -1,35 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const {sequelize} = require('../models');
+const { sequelize } = require('../models');
 const midware = require('../middlewares/middles')
-
-// //추가한 부분
-// const mysql = require('mysql');
-// const util = require('util');
-// const sequelize = mysql.createPool({
-//     connectionLimit: 10,
-//     host: process.env.DB_HOST,
-//     user: process.env.DB_USER,
-//     password: process.env.DB_PASSWORD,
-//     database: process.env.DB_DATABASE
-// });
-// sequelize.query = util.promisify(sequelize.query);
-
-// function commentget(num) {
-//     const post = 'select * from comments where postId = :postId;';
-//     const comments = sequelize.query(post, {
-//         replacements: { 
-//             postId : num
-//         },
-//             type: sequelize.QueryTypes.SELECT
-//         }
-//         );
-//     return comments;
-// }
-
-
-
-
 
 //댓글 작성
 router.post('/:postId',midware ,async (req, res) => {
@@ -47,7 +19,6 @@ router.post('/:postId',midware ,async (req, res) => {
             type: sequelize.QueryTypes.INSERT
         }
         );
-      
       res.status(200).send({ result: 'success'});
     } catch (error) {
       res.status(400).send({
@@ -102,4 +73,3 @@ router.patch('/:commentId',midware ,async (req, res) => {
     }
 });
 module.exports = router;
-// module.exports = {commentget};
