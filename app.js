@@ -8,14 +8,6 @@ dotenv.config();
 
 const port = process.env.PORT;
 const cors = require("cors");
-const mysql = require("mysql");
-const db = mysql.createConnection({
-  host: pdfdsfsdf
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
-});
-db.connect();
 
 db.query(`SHOW TABLES`, (error, results) => {
   if (error) {
