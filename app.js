@@ -1,8 +1,5 @@
 const express = require("express");
-
-const swaggerUi = require("swagger-ui-express");
-const swaggerFile = require("./swagger_output.json");
-
+const app = express()
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -13,10 +10,8 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const Router = require("./routers/post");
+const Router = require("./routers/index");
 app.use("/api", [Router]);
-
-app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 app.listen(port, () => {
   console.log(`listening at http://localhost:${port}`);
