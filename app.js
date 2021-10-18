@@ -17,8 +17,6 @@ const Router = require("./routers/post");
 app.use("/api", [Router]);
 
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
-askdjaksljdsklajdsklajdkslajdklasjd
-asdklasjdklasjdl
 
 app.listen(port, () => {
   console.log(`listening at http://localhost:${port}`);
