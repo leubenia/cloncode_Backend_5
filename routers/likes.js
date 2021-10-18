@@ -10,31 +10,24 @@ router.post("/", midware, async (req, res) => {
   const user = res.locals.user;
   try {
     if(like){
-        const likeQuery = [ user.Id , postId ]
-        const post = 'INSERT INTO likes (userId, postId) VALUES ( ?, ? )';
-        sequelize.query(post, likeQuery, (error, results) => {
-        if (error) {
-            res.status(400).send({        
-              errorMessage: error,
-              result:'fail'
-            });
-        } else {
-            res.send({results : "success"});
-        }
-        });
-    }else{
-        const likeQuery = [user.Id , postId]
+        const post = 'INSERT into likes (postId, userId) values(:postId , :userId)';
+        sequelize.query(post, {
+          replacements: { 
+              postId : postId,
+              userId : user.userId},
+              type: sequelize.QueryTypes.INSERT
+          });
+        res.status(200).send({results : "success"});
+    }
+    else{
         const post = 'DELETE FROM likes WHERE userId = ? and postId = ?;';
-        db.query(post, likeQuery, (error, results, fields) => {
-          if (error) {
-            res.status(400).send({        
-              errorMessage: error,
-              result:'fail'
-            });
-          } else {
-            res.status(200).send({results : "success"});
-          }
-        });
+        db.query(post, {
+          replacements: { 
+              postId : postId,
+              userId : user.userId},
+              type: sequelize.QueryTypes.DELETE
+          });
+        res.status(200).send({results : "success"});
     }
   } catch (err) {
     res.status(400).send({ 
