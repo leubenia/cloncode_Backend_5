@@ -3,7 +3,7 @@ create table user(
 	email varchar(50) not null unique,
 	profile text default "null",
 	password varchar(40) not null,
-     	userName varchar(40) not null,
+    userName varchar(40) not null,
 	birthday varchar(40) not null,
 	gender varchar(10),
 	primary key(Id),
