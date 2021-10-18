@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const { sequelize } = require("../models");
 
 module.exports = async (req, res, next) => {
-  const { authorization } = req.headers.X - AUTH - TOKEN;
+  const { authorization } = req.headers;
   const [tokenType, token] = authorization.split(" ");
 
   if (tokenType !== "Bearer") {
@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.SECRET_KEY);
       let users;
       const post = `SELECT * FROM user WHERE email = ?`;
-      const results = await sequelize.query(post, [decoded.email]);
+      const results = await db.query(post, [decoded.email]);
       console.log(results);
       users = {
         userId: results[0]["userId"],

@@ -160,25 +160,24 @@ router.post("/signup", upload.single("profile"), async (req, res) => {
 router.post("/login", async (req, res) => {
   let { email, pw } = req.body;
 
-  //pw 해시화 후 재할당
   try {
-    const users = await users.findOne({ where: { email } });
-
-    if (!users) {
+    let user = await users.findOne({ where: { email } }); //users로 받으면 안되네??
+    console.log(user);
+    if (!user) {
       res.status(400).send({
         result: "fail",
       });
     }
 
     //계정별 저장되어있는 salt값을 활용해서 해시화
-    let salt = users.salt;
+    let salt = user.salt;
     findUserPw = crypto
       .createHash("sha512")
       .update(pw + salt)
       .digest("hex");
 
     //해사화된 pw와 회원가입 시 해시화해서 저장한 pw와 비교
-    if (findUserPw != users.pw) {
+    if (findUserPw != user.pw) {
       res.status(400).send({
         errorMessage: "아이디 또는 패스워드가 잘못됐습니다.",
       });
@@ -199,17 +198,12 @@ router.post("/login", async (req, res) => {
     console.log("-----------token----------");
     console.log(token);
 
-    //생성한 토큰을 쿠키에 담아서 response
-    // res.cookie('token', token, {
-    //   httpOnly: true,
-    // });
-
     res.send({
       result: "success",
       token: token,
-      email: users.email,
-      userName: users.userName,
-      profile: users.profile,
+      email: user.email,
+      userName: user.userName,
+      profile: user.profile,
     });
   } catch (error) {
     console.log(error);
