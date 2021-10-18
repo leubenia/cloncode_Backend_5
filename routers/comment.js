@@ -15,17 +15,17 @@ const midware = require('../middlewares/middles')
 // });
 // sequelize.query = util.promisify(sequelize.query);
 
-function commentget(num) {
-    const post = 'select * from comments where postId = :postId;';
-    const comments = await sequelize.query(post, {
-        replacements: { 
-            postId : num
-        },
-            type: sequelize.QueryTypes.SELECT
-        }
-        );
-    return comments;
-}
+// function commentget(num) {
+//     const post = 'select * from comments where postId = :postId;';
+//     const comments = sequelize.query(post, {
+//         replacements: { 
+//             postId : num
+//         },
+//             type: sequelize.QueryTypes.SELECT
+//         }
+//         );
+//     return comments;
+// }
 
 
 
@@ -102,4 +102,4 @@ router.patch('/:commentId',midware ,async (req, res) => {
     }
 });
 module.exports = router;
-module.exports = {commentget};
+// module.exports = {commentget};

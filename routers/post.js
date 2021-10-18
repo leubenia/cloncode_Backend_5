@@ -1,16 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const { Posts, sequelize, Sequelize } = require('../models');
-const authMiddleware = require('../middlewares/middels');
+// const authMiddleware = require('../middlewares/middels');
 const multer = require('multer');
 const multerS3 = require('multer-s3'); 
 const AWS = require('aws-sdk'); 
 const path = require('path'); 
+const { commentget } = require('./comment');
+const { post } = require('.');
+const midware = require('../middlewares/middles')
 require('date-utils');
 
 AWS.config.update({
-    accessKeyId: "AKIA5VORDKNGW3D3IAPE",
-    secretAccessKey: "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",
+    accessKeyId: process.env.accessKeyId,
+    secretAccessKey: process.env.secretAccessKey,
     region: 'ap-northeast-2',
   });
 
@@ -18,7 +21,7 @@ AWS.config.update({
 const upload = multer({
 storage: multerS3({
     s3: new AWS.S3(),
-    bucket: 'dodoimglist', 
+    bucket: process.env.bucket, 
     acl: 'public-read-write',
     key(req, file, cb) {
         cb(null, `original/${Date.now()}${path.basename(file.originalname)}`);
@@ -27,31 +30,61 @@ storage: multerS3({
 limits: { fileSize: 5 * 1024 * 1024 }, 
 });
 
-
+// 게시물 조회, 좋아요 기능 추가해야 함. 
+router.get('/', async (req, res) => {
+    try {
+      const userId_join = `
+      SELECT p.*, u.profile 
+      FROM posts AS p 
+      JOIN users AS u 
+      ON p.userId = u.userId 
+      ORDER BY p.postId DESC;`
+  
+      const posts = await sequelize.query(userId_join, {
+        type: Sequelize.QueryTypes.SELECT,
+      });
+      for(post of posts) {
+        const commentget = commentget(post.postId)  
+        post.comment = commentget
+        post.commentCnt = commentget.length
+      } 
+      res.send({ result: posts });
+    } catch (error) {
+      console.log(`${req.method} ${req.originalUrl} : ${error.message}`);
+      res.status(400).send({
+        errorMessage: '전체 게시글 조회에 실패했습니다.',
+      });
+    }
+  });
   
 // 게시글 등록
-router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
+router.post('/', midware, upload.single('image'), async (req, res) => {
       try {
-        const { userId } = res.locals.user; 
+        const { user } = res.locals; 
         const { content } = req.body;
         const postDate = new Date();
-        let insertDt = postDate.toFormat('YYYY-MM-DD HH24:MI:SS')
+        const insertDt = postDate.toFormat('YYYY-MM-DD HH24:MI:SS')
         if (req.file) {
           const originalUrl = req.file.location; 
         //   const resizeUrl = originalUrl.replace(/\/original\//, '/thumb/');
-          await Posts.create({ userId, content, image: originalUrl, insertDt });
-          res.json({ originalUrl }); //resizeUrl 구현은 나중에
+          const post = await Posts.create({ 
+              user: user.userId, 
+              content, 
+              image: originalUrl, 
+              insertDt, 
+              user: user.userName});
+          res.send({ post: post, user: user, result: 'success' }); //resizeUrl 구현은 나중에
         } else {
-          res.status(400).send({ errorMessage: '이미지파일이 없습니다.' });
+          res.status(400).send({ result: 'fail', errorMessage: '이미지파일이 없습니다.' });
         }
       } catch (error) {
-        res.status(401).send({ errorMessage: '게시글 작성에 실패하였습니다.' });
+        res.status(401).send({ result: 'fail', errorMessage: '게시글 작성에 실패하였습니다.' });
       }
     }
 );
   
 // 게시글 수정
-router.put('/:postId', authMiddleware, upload.single('image'), async (req, res) => {
+router.put('/:postId', midware, upload.single('image'), async (req, res) => {
     try {
     const s3 = new AWS.S3(); 
     const postId = req.params.postId;
@@ -63,7 +96,7 @@ router.put('/:postId', authMiddleware, upload.single('image'), async (req, res) 
         const beforeImage = postInfo.image.split('/')[4];
 
         s3.deleteObject({
-            Bucket: 'dodoimglist',
+            Bucket: process.env.bucket,
             Key: `original/${beforeImage}`,
             },
             (err, data) => {
@@ -71,7 +104,7 @@ router.put('/:postId', authMiddleware, upload.single('image'), async (req, res) 
             }
         );
         s3.deleteObject({
-            Bucket: 'dodoimglist',
+            Bucket: process.env.bucket,
             Key: `thumb/${beforeImage}`,
             },
             (err, data) => {
@@ -117,7 +150,7 @@ router.put('/:postId', authMiddleware, upload.single('image'), async (req, res) 
 );
 
 // 게시글 삭제 (need to change update to delete)
-router.delete('/:postId',authMiddleware, async (req, res) => {
+router.delete('/:postId', midware, async (req, res) => {
     try {
       const postId = req.params.postId;
       const { userId } = res.locals.user; 
@@ -142,3 +175,5 @@ router.delete('/:postId',authMiddleware, async (req, res) => {
       });
     }
   });
+
+module.exports = router;
