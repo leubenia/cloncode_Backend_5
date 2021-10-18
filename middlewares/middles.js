@@ -15,10 +15,6 @@ module.exports = async (req, res, next) => {
   const { authorization } = req.headers;
   const [tokenType, token] = authorization.split(" ");
 
-  const { authorization } = req.headers;
-  //X-AUTH-TOKEN
-  const [tokenType, token] = authorization.split(" ");
-
   if (tokenType !== "Bearer") {
     res.status(401).send({
       errorMessage: "로그인이 필요합니다.",
