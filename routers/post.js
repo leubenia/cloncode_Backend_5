@@ -17,7 +17,7 @@ AWS.config.update({
 const upload = multer({
 storage: multerS3({
     s3: new AWS.S3(),
-    bucket: 'stravinestbucket', 
+    bucket: '', 
     acl: 'public-read-write',
     key(req, file, cb) {
         cb(null, ``);
@@ -30,17 +30,15 @@ limits: { fileSize: 1000 * 1000 * 10 },
 // 게시글 등록 
 router.post('/', authMiddleware, async (req, res) => {
     try {
-      const { userName } = res.locals.user; 
+      const { user } = res.locals; 
       const { content, image } = req.body;
-      await Posts.create({ userName, content, image, insertDt, profile });
+      await Posts.create({ user: user.userId, user: user.userName, content, image, insertDt, profile });
       res.status(200).send({ result: '게시글 작성이 완료되었습니다!' });
     } catch (error) {
       res.status(401).send({ errorMessage: '게시글 작성이 실패되었습니다!' });
     }
   });
   
-
-햐
 // 게시글 수정
 router.put('/:postId', authMiddleware, async (req, res) => {
     try {
