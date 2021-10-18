@@ -10,7 +10,7 @@ const port = process.env.PORT;
 const cors = require("cors");
 const mysql = require("mysql");
 const db = mysql.createConnection({
-  host: qwejqklwejklqwejklqwje,
+  host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
@@ -32,6 +32,8 @@ const postRouter = require("./routers/post");
 app.use("/api", [likesRouter]);
 
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
+askdjaksljdsklajdsklajdkslajdklasjd
+asdklasjdklasjdl
 
 app.listen(port, () => {
   console.log(`listening at http://localhost:${port}`);
