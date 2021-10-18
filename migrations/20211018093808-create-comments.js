@@ -9,6 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       comment: {
+        allowNull: false,
         type: Sequelize.STRING,
       },
       postId: {

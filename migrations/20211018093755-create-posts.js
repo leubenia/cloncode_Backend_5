@@ -18,12 +18,14 @@ module.exports = {
         onDelete: "cascade",
       },
       content: {
+        allowNull: false,
         type: Sequelize.INTEGER,
       },
       userName: {
+        allowNull: false,
         type: Sequelize.STRING,
       },
-      inserdDt: {
+      insertDt: {
         allowNull: false,
         type: Sequelize.DATE,
       },
