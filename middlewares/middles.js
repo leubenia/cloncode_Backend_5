@@ -14,6 +14,7 @@ const {sequelize} = require('../models');
 module.exports = async (req, res, next) => {
 
   const {authorization} = req.headers;
+  //X-AUTH-TOKEN
   const [tokenType, token] = authorization.split(' ')
 
   if (tokenType !== "Bearer"){
