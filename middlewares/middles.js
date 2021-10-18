@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const {sequelize} = require('../models');
+const jwt = require("jsonwebtoken");
+const { sequelize } = require("../models");
 // const mysql = require('mysql');
 // const util = require('util');
 // const sequelize = mysql.createPool({
@@ -12,47 +12,50 @@ const {sequelize} = require('../models');
 // sequelize.query = util.promisify(sequelize.query);
 
 module.exports = async (req, res, next) => {
+  const { authorization } = req.headers;
+  const [tokenType, token] = authorization.split(" ");
 
-  const {authorization} = req.headers;
+  const { authorization } = req.headers;
   //X-AUTH-TOKEN
-  const [tokenType, token] = authorization.split(' ')
+  const [tokenType, token] = authorization.split(" ");
 
-  if (tokenType !== "Bearer"){
+  if (tokenType !== "Bearer") {
     res.status(401).send({
-      errorMessage: "로그인이 필요합니다."
+      errorMessage: "로그인이 필요합니다.",
     });
     return;
   }
-  console.log(token)
+  console.log(token);
 
-  console.log('미들웨어 사용함');
+  console.log("미들웨어 사용함");
   try {
     if (token) {
       const decoded = jwt.verify(token, process.env.SECRET_KEY);
       let users;
 
-      const post = 'SELECT * FROM users WHERE email = :email';
-      const results = await sequelize.query(post,  {
+      const post = "SELECT * FROM users WHERE email = :email";
+      const results = await sequelize.query(post, {
         replacements: { email: decoded.email },
-        type: sequelize.QueryTypes.SELECT
+        type: sequelize.QueryTypes.SELECT,
       });
- 
+
       users = {
-        userId: results[0]['userId'],
-        email: results[0]['email'],
-        nickname: results[0]['userName'],
+        userId: results[0]["userId"],
+        email: results[0]["email"],
+        nickname: results[0]["userName"],
       };
 
       res.locals.user = users;
-      console.log('로컬 유저는?', res.locals.user);
+      console.log("로컬 유저는?", res.locals.user);
     } else {
       res.locals.user = undefined;
-      console.log('토큰 없습니다.')
-      console.log('로컬 유저는?', res.locals.user);
+      console.log("토큰 없습니다.");
+      console.log("로컬 유저는?", res.locals.user);
     }
   } catch (err) {
-    console.log(err)
-    res.status(401).send({ errorMessage: '로그인이 필요합니다' });
+    console.log(err);
+    res.status(401).send({ errorMessage: "로그인이 필요합니다" });
+
     return;
   }
   next();
