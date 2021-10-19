@@ -55,6 +55,13 @@ module.exports = (sequelize, DataTypes) => {
       timestamps: false,
     }
   );
-
+  users.associate = function (models) {
+    models.users.hasMany(models.posts ,{
+      foreignKey: "userId", sourceKey: 'userId'
+    });
+    models.users.hasMany(models.likes,{
+      foreignKey: "userId", sourceKey: 'userId'
+    });
+  };
   return users;
 };

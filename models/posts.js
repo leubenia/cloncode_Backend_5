@@ -43,12 +43,14 @@ module.exports = (sequelize, DataTypes) => {
       timestamps: false,
     }
   );
-
+  
   posts.associate = function (models) {
-    models.posts.hasMany(models.users, {
-      foreignKey: "userId",
-      onDelete: "cascade",
-    });
+    models.posts.hasMany(models.comments);
+    models.posts.hasMany(models.likes);
+    models.posts.belongsTo(models.users, {
+      foreignKey: "userId", 
+      sourceKey: 'userId'
+    })
   };
   return posts;
 };

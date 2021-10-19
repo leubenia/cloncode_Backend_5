@@ -39,11 +39,11 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   comments.associate = function (models) {
-    models.comments.hasMany(models.posts, {
+    models.comments.belongsTo(models.posts, {
       foreignKey: "postId",
       onDelete: "cascade",
     });
-    models.comments.hasMany(models.users, {
+    models.comments.belongsTo(models.users, {
       foreignKey: "userId",
       onDelete: "cascade",
     });
