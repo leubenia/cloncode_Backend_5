@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       postId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
         required: true,
       },
       userId: {

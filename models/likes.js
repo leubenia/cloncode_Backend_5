@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       likeId: {
         type: DataTypes.INTEGER,
+        autoIncrement: true,
         primaryKey: true,
         required: true,
       },
