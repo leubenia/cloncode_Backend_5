@@ -26,7 +26,6 @@ app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 //     console.error(err);
 //     return;
 //   }
-
 //   console.log('초기화 완료.');
 // };
 // driver();
