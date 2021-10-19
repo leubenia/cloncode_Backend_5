@@ -3,6 +3,8 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const Validator = require('../middlewares/validator');
+
 const multer = require('multer'); //form data 처리를 할수 있는 라이브러리 multer
 const multerS3 = require('multer-s3'); // aws s3에 파일을 처리 할수 있는 라이브러리 multer-s3
 const AWS = require('aws-sdk'); //javascript 용 aws 서비스 사용 라이브러리
@@ -26,134 +28,90 @@ const upload = multer({
   }),
   limits: { fileSize: 5 * 1024 * 1024 }, //최대 사이즈 5mb
 });
-//유효성체크 함수
-//id 유효성 체크 -  알파벳 대소문자, 숫자만 사용가능, 최소 3자리 이상
-const valCheckId = function (target_id) {
-  const regex_id =
-    /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
-  const idCheckResult = regex_id.test(target_id);
-  console.log(idCheckResult);
-  return idCheckResult;
+
+//salt 값 지정
+const saltAppointed = function (pw, salt) {
+  console.log('salt넣습니다.');
+  pw = crypto
+    .createHash('sha512')
+    .update(pw + salt)
+    .digest('hex');
+  return pw;
 };
-//pw 유효성 체크 - 패스워드는 닉네임과 같은 내용이 포함될 수 없음, 최소 4자리 이상
-const valCheckPw = function (target_password) {
-  if (target_password.length >= 4) {
-    return true;
-  }
-  return false;
-};
+
 //회원가입
-router.post('/signup', upload.single('profile'), async (req, res) => {
-  try {
-    const { userName, email, birthday, gender } = req.body;
-    let { pw } = req.body;
-    console.log(req.body);
-    if (req.file) {
-      //이미지 값이 있으면!!!
-      const originalUrl = req.file.location;
-      const resizeUrl = originalUrl.replace(/\/original\//, '/thumb/');
-      // 프론트와 논의함 => id는 메일로 받기로.
-      if (!valCheckId(email)) {
-        res.status(400).send({
-          result: 'fail',
-          errorMessage: '잘못된 이메일 형식입니다.',
-        });
-        return;
-      }
-      //패스워드 유효성 체크
-      if (!valCheckPw(pw)) {
-        res.status(400).send({
-          result: 'fail',
-          errorMessage: '패스워드는 최소 4자리 이상이어야 합니다.',
-        });
-        return;
-      }
-      //중복 아이디 여부 체크
+router.post(
+  '/signup',
+  upload.single('profile'),
+  Validator('signup'),
+  async (req, res) => {
+    try {
+      const { userName, email, birthday, gender } = req.body;
+      let { pw } = req.body;
+      const salt = crypto.randomBytes(128).toString('base64');
+
       const existUserId = await users.findOne({ where: { email } });
       if (existUserId) {
+        console.log('여기 돌면 멈춰야되는디');
         res.status(400).send({
           result: 'fail',
           errorMessage: '이미 가입된 아이디가 있습니다.',
         });
         return;
       }
-      const salt = crypto.randomBytes(128).toString('base64');
-      pw = crypto
-        .createHash('sha512')
-        .update(pw + salt)
-        .digest('hex');
-      //salt값 같이 저장해야함. 없으면 로그인 시 비교불가
-      await users.create({
-        userName: userName,
-        email: email,
-        profile: resizeUrl, //이미지 url
-        pw: pw,
-        birthday: birthday,
-        gender: gender,
-        salt: salt,
-      });
-      res.status(200).send({
-        result: 'success',
-      });
-    } else {
-      // 프론트와 논의함 => id는 메일로 받기로.
-      if (!valCheckId(email)) {
-        res.status(400).send({
-          result: 'fail',
-          errorMessage: '이메일 형식이어야 합니다.',
+
+      if (req.file) {
+        //이미지 값이 있으면!!!
+        const originalUrl = req.file.location;
+        const resizeUrl = originalUrl.replace(/\/original\//, '/thumb/');
+        pw = saltAppointed(pw, salt);
+
+        //salt값 같이 저장해야함. 없으면 로그인 시 비교불가
+        await users.create({
+          userName: userName,
+          email: email,
+          profile: resizeUrl, //이미지 url
+          pw: pw,
+          birthday: birthday,
+          gender: gender,
+          salt: salt,
         });
-        return;
-      }
-      //패스워드 유효성 체크
-      if (!valCheckPw(pw)) {
-        res.status(400).send({
-          result: 'fail',
-          errorMessage: '패스워드는 최소 4자리 이상이어야 합니다.',
+
+        res.status(200).send({
+          result: 'success',
         });
-        return;
-      }
-      //중복 아이디 여부 체크
-      const existUserId = await users.findOne({ where: { email } });
-      if (existUserId) {
-        res.status(400).send({
-          result: 'fail',
-          errorMessage: '이미 가입된 아이디가 있습니다.',
+      } else {
+        pw = saltAppointed(pw);
+        //salt값 같이 저장해야함. 없으면 로그인 시 비교불가
+        await users.create({
+          userName: userName,
+          email: email,
+          profile: '',
+          pw: pw,
+          birthday: birthday,
+          gender: gender,
+          salt: salt,
         });
-        return;
+
+        res.status(200).send({
+          result: 'success',
+        });
       }
-      const salt = crypto.randomBytes(128).toString('base64');
-      pw = crypto
-        .createHash('sha512')
-        .update(pw + salt)
-        .digest('hex');
-      //salt값 같이 저장해야함. 없으면 로그인 시 비교불가
-      await users.create({
-        userName: userName,
-        email: email,
-        profile: '',
-        pw: pw,
-        birthday: birthday,
-        gender: gender,
-        salt: salt,
-      });
-      res.status(200).send({
-        result: 'success',
-        msg: '회원가입 완료!',
+    } catch (error) {
+      console.log(error);
+      res.status(400).send({
+        errorMessage:
+          '알 수 없는 오류가 발생했습니다. 관리자에게 문의해주세요.',
       });
     }
-  } catch (error) {
-    console.log(error);
-    res.status(400).send({
-      errorMessage: '알 수 없는 오류가 발생했습니다. 관리자에게 문의해주세요.',
-    });
   }
-});
+);
 //로그인
-router.post('/login', async (req, res) => {
+router.post('/login', Validator('login'), async (req, res) => {
   let { email, pw } = req.body;
   try {
     let user = await users.findOne({ where: { email } }); //users로 받으면 안되네??
-    console.log(user);
+
     if (!user) {
       res.status(400).send({
         result: 'fail',
@@ -161,10 +119,12 @@ router.post('/login', async (req, res) => {
     }
     //계정별 저장되어있는 salt값을 활용해서 해시화
     let salt = user.salt;
+
     findpw = crypto
       .createHash('sha512')
       .update(pw + salt)
       .digest('hex');
+
     //해사화된 pw와 회원가입 시 해시화해서 저장한 pw와 비교
     if (findpw != user.pw) {
       res.status(400).send({
@@ -183,6 +143,7 @@ router.post('/login', async (req, res) => {
         expiresIn: '2h',
       }
     );
+
     console.log('-----------token----------');
     console.log(token);
     res.send({
@@ -201,22 +162,3 @@ router.post('/login', async (req, res) => {
   }
 });
 module.exports = router;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
