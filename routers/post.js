@@ -3,13 +3,21 @@ const router = express.Router();
 const { posts, sequelize, Sequelize } = require('../models');
 // const authMiddleware = require('../middlewares/middels');
 const multer = require('multer');
+<<<<<<< HEAD
 const multerS3 = require('multer-s3');
 const AWS = require('aws-sdk');
 const path = require('path');
 const { commentget } = require('./comment');
 const { post } = require('.');
 const midware = require('../middlewares/middles');
+=======
+const multerS3 = require('multer-s3'); 
+const AWS = require('aws-sdk'); 
+const path = require('path'); 
+const midware = require('../middlewares/middles')
+>>>>>>> main
 require('date-utils');
+const { commentget } = require('../middlewares/comment')
 
 AWS.config.update({
   accessKeyId: process.env.accessKeyId,
@@ -75,6 +83,7 @@ router.post('/', midware, upload.single('image'), async (req, res) => {
           res.status(400).send({ result: 'fail', errorMessage: '이미지파일이 없습니다.' });
         }
       } catch (error) {
+        console.log(error)
         res.status(401).send({ result: 'fail', errorMessage: '게시글 작성에 실패하였습니다.' });
       }
     }
@@ -129,17 +138,24 @@ router.put('/:postId', midware, upload.single('image'), async (req, res) => {
           { where: { postId: postId, userId: userId } }
         );
         res.send({ result: '게시글을 수정하였습니다.' });
+<<<<<<< HEAD
       } else {
         res.status(401).send({ result: '게시글 수정 실패 되었습니다.' });
       }
+=======
+        } else {
+        res.status(400).send({ result: '게시글 수정 실패 되었습니다.' });
+        }
+>>>>>>> main
     } else {
 
         const postInfo = await posts.findOne({ where: { postId, userId } });
         if (postInfo) {
-        await posts.update(
+        await postInfo.update(
             {
 
             content: content,
+<<<<<<< HEAD
           },
           { where: { postId: postId, userId: userId } }
         );
@@ -149,6 +165,14 @@ router.put('/:postId', midware, upload.single('image'), async (req, res) => {
           .status(401)
           .send({ errorMessage: '이미지가 없고 해당게시글도 없습니다..' });
       }
+=======
+            }
+        );
+        res.send({ result: '게시글을 수정하였습니다.' });
+        } else {
+        res.status(401).send({ errorMessage: '이미지가 없고 해당게시글도 없습니다..' });
+        }
+>>>>>>> main
     }
   } catch (error) {
     res.status(400).send({
@@ -164,9 +188,27 @@ router.delete('/:postId', midware, async (req, res) => {
       const postId = req.params.postId;
       const { userId } = res.locals.user; 
       const postInfo = await posts.findOne({ where: { postId, userId } });
-
+    // 삭제기능구현(need to put delete instead of updtae)
       if (postInfo) {
-        await posts.delete({ postId: postId });
+        const beforeImage = postInfo.image.split('/')[4];
+
+        s3.deleteObject({
+            Bucket: process.env.bucket,
+            Key: `original/${beforeImage}`,
+            },
+            (err, data) => {
+            if (err) { throw err; }
+            }
+        );
+        s3.deleteObject({
+            Bucket: process.env.bucket,
+            Key: `thumb/${beforeImage}`,
+            },
+            (err, data) => {
+            if (err) { throw err; }
+            }
+        );
+        await posts.destroy({where: {postId:postId}});
         res.send({ result: '게시글이 삭제되었습니다!' });
       } else {
         res.status(401).send({
