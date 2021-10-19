@@ -149,6 +149,7 @@ router.put('/:postId', midware, upload.single('image'), async (req, res) => {
 // 게시글 삭제 
 router.delete('/:postId', midware, async (req, res) => {
     try {
+      const s3 = new AWS.S3(); 
       const postId = req.params.postId;
       const { userId } = res.locals.user; 
       const postInfo = await posts.findOne({ where: { postId, userId } });
@@ -164,14 +165,14 @@ router.delete('/:postId', midware, async (req, res) => {
             if (err) { throw err; }
             }
         );
-        s3.deleteObject({
-            Bucket: process.env.bucket,
-            Key: `thumb/${beforeImage}`,
-            },
-            (err, data) => {
-            if (err) { throw err; }
-            }
-        );
+        // s3.deleteObject({
+        //     Bucket: process.env.bucket,
+        //     Key: `thumb/${beforeImage}`,
+        //     },
+        //     (err, data) => {
+        //     if (err) { throw err; }
+        //     }
+        // );
         await posts.destroy({where: {postId:postId}});
         res.send({ result: '게시글이 삭제되었습니다!' });
       } else {
@@ -180,6 +181,7 @@ router.delete('/:postId', midware, async (req, res) => {
         });
       }
     } catch (error) {
+      console.log(error)
       res.status(400).send({
         errorMessage: '게시글 삭제에 실패했습니다!',
       });
