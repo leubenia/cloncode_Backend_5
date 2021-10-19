@@ -10,8 +10,13 @@ module.exports = function (validator) {
   //--- 3. 해당하는 파일이 있다면 그 파일 내 구현한 Schema로 체크한다 ---
   return async function (req, res, next) {
     try {
+      console.log('검사중이야');
+      console.log(req.body);
       const validated = await Validators[validator].validateAsync(req.body);
+
       req.body = validated;
+      console.log(req.body);
+      console.log('검사완료');
       next();
     } catch (err) {
       if (err.isJoi)
