@@ -128,7 +128,7 @@ router.post('/signup', upload.single('profile'), async (req, res) => {
       }
 
       //중복 아이디 여부 체크
-      const existUserId = await users.findOne({ where: { userId } });
+      const existUserId = await users.findOne({ where: { email } });
       if (existUserId) {
         res.status(400).send({
           result: 'fail',
@@ -138,16 +138,16 @@ router.post('/signup', upload.single('profile'), async (req, res) => {
       }
 
       const salt = crypto.randomBytes(128).toString('base64');
-      userPw = crypto
+      pw = crypto
         .createHash('sha512')
-        .update(userPw + salt)
+        .update(pw + salt)
         .digest('hex');
 
       //salt값 같이 저장해야함. 없으면 로그인 시 비교불가
       await users.create({
         userName: userName,
         email: email,
-        profile: profile,
+        profile: '',
         pw: pw,
         birthday: birthday,
         gender: gender,
