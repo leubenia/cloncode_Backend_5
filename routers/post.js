@@ -21,10 +21,10 @@ const upload = multer({
 storage: multerS3({
     s3: new AWS.S3(),
     bucket: process.env.bucket, 
-    acl: 'public-read-write',
     key(req, file, cb) {
         cb(null, `original/${Date.now()}${path.basename(file.originalname)}`);
     },
+    acl: 'public-read-write',
 }),
 limits: { fileSize: 5 * 1024 * 1024 }, 
 });
@@ -56,7 +56,7 @@ router.get('/', async (req, res) => {
     }
   });
   
-// 게시글 등록
+// 게시글 등록 resizeURL구현해야함
 router.post('/', midware, upload.single('image'), async (req, res) => {
       try {
         const { user } = res.locals; 
@@ -66,15 +66,13 @@ router.post('/', midware, upload.single('image'), async (req, res) => {
         if (req.file) {
           const originalUrl = req.file.location; 
         //   const resizeUrl = originalUrl.replace(/\/original\//, '/thumb/');
-        console.log(content,user,insertDt)  
-        const post = await posts.create({ 
+          const post = await posts.create({ 
               userId: user.userId, 
               content: content, 
               image: originalUrl, 
               insertDt: insertDt, 
               userName: user.userName});
-        console.log(post)
-        res.send({ post: post, user: user, result: 'success' }); //resizeUrl 구현은 나중에
+          res.send({ post: post, user: user, result: 'success' });
         } else {
           res.status(400).send({ result: 'fail', errorMessage: '이미지파일이 없습니다.' });
         }
@@ -105,14 +103,14 @@ router.put('/:postId', midware, upload.single('image'), async (req, res) => {
             if (err) { throw err; }
             }
         );
-        s3.deleteObject({
-            Bucket: process.env.bucket,
-            Key: `thumb/${beforeImage}`,
-            },
-            (err, data) => {
-            if (err) { throw err; }
-            }
-        );
+        // s3.deleteObject({
+        //     Bucket: process.env.bucket,
+        //     Key: `thumb/${beforeImage}`,
+        //     },
+        //     (err, data) => {
+        //     if (err) { throw err; }
+        //     }
+        // );
 
         const originalUrl = req.file.location; 
 
@@ -148,7 +146,7 @@ router.put('/:postId', midware, upload.single('image'), async (req, res) => {
 }
 );
 
-// 게시글 삭제 (need to change update to delete)
+// 게시글 삭제 
 router.delete('/:postId', midware, async (req, res) => {
     try {
       const postId = req.params.postId;
