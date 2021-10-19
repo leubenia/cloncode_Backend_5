@@ -1,5 +1,5 @@
-"use strict";
-const { Model } = require("sequelize");
+'use strict';
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class likes extends Model {
     /**
@@ -31,17 +31,18 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "likes",
+      timestamps: false,
     }
   );
 
   likes.associate = function (models) {
     models.likes.belongsTo(models.posts, {
-      foreignKey: "postId",
-      onDelete: "cascade",
+      foreignKey: 'postId',
+      onDelete: 'cascade',
     });
     models.likes.belongsTo(models.users, {
-      foreignKey: "userId",
-      onDelete: "cascade",
+      foreignKey: 'userId',
+      onDelete: 'cascade',
     });
   };
   return likes;
