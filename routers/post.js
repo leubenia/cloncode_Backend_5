@@ -7,8 +7,9 @@ const multerS3 = require('multer-s3');
 const AWS = require('aws-sdk');
 const path = require('path');
 const midware = require('../middlewares/middles');
+const cget = require('./funpost');
 require('date-utils');
-const { commentget } = require('../middlewares/comment');
+
 
 AWS.config.update({
   accessKeyId: process.env.accessKeyId,
@@ -43,9 +44,11 @@ router.get('/', async (req, res) => {
       type: Sequelize.QueryTypes.SELECT,
     });
     for (post of posts) {
-      const commentget = commentget(post.postId);
+      const commentget = cget.commentget(post.postId)
       post.comment = commentget;
       post.commentCnt = commentget.length;
+      const likesget = cget.likeget(post.postId);
+      post.likeCnt = likesget.length;
     }
     res.send({ result: posts });
   } catch (error) {
