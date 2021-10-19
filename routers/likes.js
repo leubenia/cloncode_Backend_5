@@ -8,10 +8,11 @@ const midware = require('../middlewares/middles')
 router.post("/", midware, async (req, res) => {
   const { postId, like } = req.body; 
   const user = res.locals.user;
+  console.log(like,postId)
   try {
     if(like){
         const post = 'INSERT into likes (postId, userId) values(:postId , :userId)';
-        sequelize.query(post, {
+        await sequelize.query(post, {
           replacements: { 
               postId : postId,
               userId : user.userId},
@@ -20,8 +21,8 @@ router.post("/", midware, async (req, res) => {
         res.status(200).send({results : "success"});
     }
     else{
-        const post = 'DELETE FROM likes WHERE userId = ? and postId = ?;';
-        db.query(post, {
+        const post = 'DELETE FROM likes WHERE userId = :userId and postId = :postId;';
+        await sequelize.query(post, {
           replacements: { 
               postId : postId,
               userId : user.userId},

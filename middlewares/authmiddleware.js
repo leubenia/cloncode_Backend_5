@@ -8,6 +8,7 @@ module.exports = async (req, res, next) => {
     console.log(req.headers);
     const authorization = req.headers[location];
     console.log(authorization);
+
     if (authorization) {
       //   res.status(401).send({
       //     errorMessage: "로그인 후 사용하세요.",
