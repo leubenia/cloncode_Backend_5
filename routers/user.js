@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const Validator = require('../middlewares/Validator');
+const Validator = require('../middlewares/validator');
 
 const multer = require('multer'); //form data 처리를 할수 있는 라이브러리 multer
 const multerS3 = require('multer-s3'); // aws s3에 파일을 처리 할수 있는 라이브러리 multer-s3
@@ -28,22 +28,17 @@ const upload = multer({
   }),
   limits: { fileSize: 5 * 1024 * 1024 }, //최대 사이즈 5mb
 });
-//유효성체크 함수
-//id 유효성 체크 -  알파벳 대소문자, 숫자만 사용가능, 최소 3자리 이상
-const valCheckId = function (target_id) {
-  const regex_id =
-    /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
-  const idCheckResult = regex_id.test(target_id);
-  console.log(idCheckResult);
-  return idCheckResult;
+
+//salt 값 지정
+const saltAppointed = function (pw, salt) {
+  console.log('salt넣습니다.');
+  pw = crypto
+    .createHash('sha512')
+    .update(pw + salt)
+    .digest('hex');
+  return pw;
 };
-//pw 유효성 체크 - 패스워드는 닉네임과 같은 내용이 포함될 수 없음, 최소 4자리 이상
-const valCheckPw = function (target_password) {
-  if (target_password.length >= 4) {
-    return true;
-  }
-  return false;
-};
+
 //회원가입
 router.post(
   '/signup',
@@ -53,43 +48,23 @@ router.post(
     try {
       const { userName, email, birthday, gender } = req.body;
       let { pw } = req.body;
-      console.log(req.body);
+      const salt = crypto.randomBytes(128).toString('base64');
+
+      const existUserId = await users.findOne({ where: { email } });
+      if (existUserId) {
+        console.log('여기 돌면 멈춰야되는디');
+        res.status(400).send({
+          result: 'fail',
+          errorMessage: '이미 가입된 아이디가 있습니다.',
+        });
+        return;
+      }
+
       if (req.file) {
         //이미지 값이 있으면!!!
         const originalUrl = req.file.location;
         const resizeUrl = originalUrl.replace(/\/original\//, '/thumb/');
-
-        // 프론트와 논의함 => id는 메일로 받기로.
-        if (!valCheckId(email)) {
-          res.status(400).send({
-            result: 'fail',
-            errorMessage: '잘못된 이메일 형식입니다.',
-          });
-          return;
-        }
-        //패스워드 유효성 체크
-        if (!valCheckPw(pw)) {
-          res.status(400).send({
-            result: 'fail',
-            errorMessage: '패스워드는 최소 4자리 이상이어야 합니다.',
-          });
-          return;
-        }
-        //중복 아이디 여부 체크
-        const existUserId = await users.findOne({ where: { email } });
-        if (existUserId) {
-          res.status(400).send({
-            result: 'fail',
-            errorMessage: '이미 가입된 아이디가 있습니다.',
-          });
-          return;
-        }
-
-        const salt = crypto.randomBytes(128).toString('base64');
-        pw = crypto
-          .createHash('sha512')
-          .update(pw + salt)
-          .digest('hex');
+        pw = saltAppointed(pw, salt);
 
         //salt값 같이 저장해야함. 없으면 로그인 시 비교불가
         await users.create({
@@ -106,38 +81,7 @@ router.post(
           result: 'success',
         });
       } else {
-        // 프론트와 논의함 => id는 메일로 받기로.
-        if (!valCheckId(email)) {
-          res.status(400).send({
-            result: 'fail',
-            errorMessage: '이메일 형식이어야 합니다.',
-          });
-          return;
-        }
-        //패스워드 유효성 체크
-        if (!valCheckPw(pw)) {
-          res.status(400).send({
-            result: 'fail',
-            errorMessage: '패스워드는 최소 4자리 이상이어야 합니다.',
-          });
-          return;
-        }
-        //중복 아이디 여부 체크
-        const existUserId = await users.findOne({ where: { email } });
-        if (existUserId) {
-          res.status(400).send({
-            result: 'fail',
-            errorMessage: '이미 가입된 아이디가 있습니다.',
-          });
-          return;
-        }
-
-        const salt = crypto.randomBytes(128).toString('base64');
-        pw = crypto
-          .createHash('sha512')
-          .update(pw + salt)
-          .digest('hex');
-
+        pw = saltAppointed(pw);
         //salt값 같이 저장해야함. 없으면 로그인 시 비교불가
         await users.create({
           userName: userName,
@@ -151,7 +95,6 @@ router.post(
 
         res.status(200).send({
           result: 'success',
-          msg: '회원가입 완료!',
         });
       }
     } catch (error) {
@@ -168,7 +111,7 @@ router.post('/login', Validator('login'), async (req, res) => {
   let { email, pw } = req.body;
   try {
     let user = await users.findOne({ where: { email } }); //users로 받으면 안되네??
-    console.log(user);
+
     if (!user) {
       res.status(400).send({
         result: 'fail',

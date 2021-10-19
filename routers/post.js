@@ -66,6 +66,7 @@ router.post('/', midware, upload.single('image'), async (req, res) => {
     if (req.file) {
       const originalUrl = req.file.location;
       //   const resizeUrl = originalUrl.replace(/\/original\//, '/thumb/');
+
       const post = await posts.create({
         userId: user.userId,
         content: content,

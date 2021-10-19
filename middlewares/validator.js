@@ -11,16 +11,15 @@ module.exports = function (validator) {
   return async function (req, res, next) {
     try {
       console.log('검사중이야');
-      console.log(req.body);
       const validated = await Validators[validator].validateAsync(req.body);
 
       req.body = validated;
-      console.log(req.body);
       console.log('검사완료');
       next();
     } catch (err) {
       if (err.isJoi)
         res.status(401).send({
+          result: 'fail',
           errorMessage: '입력정보를 다시 확인해주세요.',
         });
     }
