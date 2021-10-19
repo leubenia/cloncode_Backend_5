@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       content: {
         required: true,
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
       },
       userName: {
         type: DataTypes.STRING,
@@ -39,6 +39,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "posts",
+      timestamps: false,
     }
   );
 

@@ -38,7 +38,7 @@ module.exports = async (req, res, next) => {
       users = {
         userId: results[0]["userId"],
         email: results[0]["email"],
-        nickname: results[0]["userName"],
+        userName: results[0]["userName"],
       };
 
       res.locals.user = users;
