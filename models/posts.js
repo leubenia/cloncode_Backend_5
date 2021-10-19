@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       userName: {
         type: DataTypes.STRING,
       },
-      inserdDt: {
+      insertDt: {
         type: DataTypes.STRING,
       },
       image: {
@@ -45,6 +45,7 @@ module.exports = (sequelize, DataTypes) => {
   );
   
   posts.associate = function (models) {
+    //posts모델 안에 "postsId라는 컬럼 이름"으로 comments모델에 있는 "postId값"을 새로운 컬럼으로 추가한다.
     models.posts.hasMany(models.comments, {
       foreignKey: "postId", 
       sourceKey: 'postId'
