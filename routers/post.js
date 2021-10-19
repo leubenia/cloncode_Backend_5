@@ -152,7 +152,6 @@ router.delete('/:postId', midware, async (req, res) => {
       const postId = req.params.postId;
       const { userId } = res.locals.user; 
       const postInfo = await posts.findOne({ where: { postId, userId } });
-    // 삭제기능구현(need to put delete instead of updtae)
       if (postInfo) {
         const beforeImage = postInfo.image.split('/')[4];
 

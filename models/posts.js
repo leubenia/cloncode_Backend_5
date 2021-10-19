@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       userName: {
         type: DataTypes.STRING,
       },
-      inserdDt: {
+      insertDt: {
         type: DataTypes.STRING,
       },
       image: {
