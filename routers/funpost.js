@@ -2,7 +2,7 @@ const { sequelize, Sequelize } = require('../models');
 
 async function commentget(num) {
     const post = 'select * from comments where postId = :postId;';
-    const comments = sequelize.query(post, {
+    const comments = await sequelize.query(post, {
         replacements: { 
             postId : num
         },
@@ -14,7 +14,7 @@ async function commentget(num) {
 
 async function likeget(num) {
     const post = 'select * from likes where postId = :postId;';
-    const comments = sequelize.query(post, {
+    const comments = await sequelize.query(post, {
         replacements: { 
             postId : num
         },

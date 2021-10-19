@@ -44,10 +44,10 @@ router.get('/', async (req, res) => {
       type: Sequelize.QueryTypes.SELECT,
     });
     for (post of posts) {
-      const commentget = cget.commentget(post.postId)
+      const commentget = await cget.commentget(post.postId)
       post.comment = commentget;
       post.commentCnt = commentget.length;
-      const likesget = cget.likeget(post.postId);
+      const likesget = await cget.likeget(post.postId);
       post.likeCnt = likesget.length;
     }
     res.send({ result: posts });
