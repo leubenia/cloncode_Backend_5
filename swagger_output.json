@@ -58,7 +58,7 @@
   "paths": {
     "/api/signup": {
       "post": {
-        "tags": [],
+        "tags": ["User"],
         "description": "",
         "parameters": [
           {
@@ -98,7 +98,7 @@
     },
     "/api/login": {
       "post": {
-        "tags": [],
+        "tags": ["Login"],
         "description": "",
         "parameters": [
           {
