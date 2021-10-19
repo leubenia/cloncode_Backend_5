@@ -26,7 +26,7 @@ const driver = async () => {
 
   console.log('초기화 완료.');
 };
-driver();
+// driver();
 
 app.listen(port, () => {
   console.log(`listening at http://localhost:${port}`);
