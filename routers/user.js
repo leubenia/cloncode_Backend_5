@@ -14,7 +14,6 @@ AWS.config.update({
   secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
   region: 'ap-northeast-2', // 한국
 });
-
 const upload = multer({
   //upload라는 변수에 multer 생성
   storage: multerS3({
@@ -28,7 +27,6 @@ const upload = multer({
   }),
   limits: { fileSize: 5 * 1024 * 1024 }, //최대 사이즈 5mb
 });
-
 //유효성체크 함수
 //id 유효성 체크 -  알파벳 대소문자, 숫자만 사용가능, 최소 3자리 이상
 const valCheckId = function (target_id) {
@@ -36,10 +34,8 @@ const valCheckId = function (target_id) {
     /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
   const idCheckResult = regex_id.test(target_id);
   console.log(idCheckResult);
-
   return idCheckResult;
 };
-
 //pw 유효성 체크 - 패스워드는 닉네임과 같은 내용이 포함될 수 없음, 최소 4자리 이상
 const valCheckPw = function (target_password) {
   if (target_password.length >= 4) {
@@ -47,7 +43,6 @@ const valCheckPw = function (target_password) {
   }
   return false;
 };
-
 //회원가입
 router.post('/signup', upload.single('profile'), async (req, res) => {
   try {
@@ -67,7 +62,6 @@ router.post('/signup', upload.single('profile'), async (req, res) => {
         });
         return;
       }
-
       //패스워드 유효성 체크
       if (!valCheckPw(pw)) {
         res.status(400).send({
@@ -76,10 +70,8 @@ router.post('/signup', upload.single('profile'), async (req, res) => {
         });
         return;
       }
-
       //중복 아이디 여부 체크
       const existUserId = await users.findOne({ where: { email } });
-
       if (existUserId) {
         res.status(400).send({
           result: 'fail',
@@ -117,7 +109,6 @@ router.post('/signup', upload.single('profile'), async (req, res) => {
         });
         return;
       }
-
       //패스워드 유효성 체크
       if (!valCheckPw(pw)) {
         res.status(400).send({
@@ -126,7 +117,6 @@ router.post('/signup', upload.single('profile'), async (req, res) => {
         });
         return;
       }
-
       //중복 아이디 여부 체크
       const existUserId = await users.findOne({ where: { email } });
       if (existUserId) {
@@ -166,11 +156,9 @@ router.post('/signup', upload.single('profile'), async (req, res) => {
     });
   }
 });
-
 //로그인
 router.post('/login', async (req, res) => {
   let { email, pw } = req.body;
-
   try {
     let user = await users.findOne({ where: { email } }); //users로 받으면 안되네??
     console.log(user);
@@ -179,23 +167,22 @@ router.post('/login', async (req, res) => {
         result: 'fail',
       });
     }
-
     //계정별 저장되어있는 salt값을 활용해서 해시화
     let salt = user.salt;
-    findUserPw = crypto
+
+    findpw = crypto
       .createHash('sha512')
       .update(pw + salt)
       .digest('hex');
 
     //해사화된 pw와 회원가입 시 해시화해서 저장한 pw와 비교
-    if (findUserPw != user.pw) {
+    if (findpw != user.pw) {
       res.status(400).send({
         result: 'fail',
         errorMessage: '아이디 또는 패스워드가 잘못됐습니다.',
       });
       return;
     }
-
     //jwt토큰 생성
     const token = jwt.sign(
       {
@@ -209,7 +196,6 @@ router.post('/login', async (req, res) => {
 
     console.log('-----------token----------');
     console.log(token);
-
     res.send({
       result: 'success',
       token: token,
@@ -225,5 +211,4 @@ router.post('/login', async (req, res) => {
     });
   }
 });
-
 module.exports = router;
