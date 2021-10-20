@@ -23,6 +23,10 @@
     {
       "name": "reply",
       "description": "댓글"
+    },
+    {
+      "name": "Like",
+      "description": "좋아요"
     }
   ],
   "schemes": [
@@ -37,12 +41,8 @@
       "description": "send JWT"
     }
   },
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
+  "consumes": [],
+  "produces": [],
   "paths": {
     "/api/signup": {
       "post": {
@@ -50,28 +50,40 @@
         "description": "",
         "parameters": [
           {
-            "name": "obj",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "userName": {
-                  "example": "any"
-                },
-                "email": {
-                  "example": "any"
-                },
-                "birthday": {
-                  "example": "any"
-                },
-                "gender": {
-                  "example": "any"
-                },
-                "pw": {
-                  "example": "any"
-                }
-              }
-            }
+            "in": "formData",
+            "name": "profile",
+            "required": false,
+            "type": "file"
+          },
+          {
+            "in": "formData",
+            "name": "userName",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "email",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "birthday",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "gender",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "pw",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -326,7 +338,7 @@
     },
     "/api/like/": {
       "post": {
-        "tags": ["reply"],
+        "tags": ["Like"],
         "description": "",
         "parameters": [
           {
@@ -354,6 +366,7 @@
           },
           "401": {
             "description": "Unauthorized"
+
           }
         }
       }

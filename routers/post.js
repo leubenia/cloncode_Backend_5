@@ -10,7 +10,6 @@ const midware = require('../middlewares/middles');
 const cget = require('./funpost');
 require('date-utils');
 
-
 AWS.config.update({
   accessKeyId: process.env.accessKeyId,
   secretAccessKey: process.env.secretAccessKey,
@@ -44,7 +43,7 @@ router.get('/', async (req, res) => {
       type: Sequelize.QueryTypes.SELECT,
     });
     for (post of posts) {
-      const commentget = await cget.commentget(post.postId)
+      const commentget = await cget.commentget(post.postId);
       post.comment = commentget;
       post.commentCnt = commentget.length;
       const likesget = await cget.likeget(post.postId);
@@ -61,40 +60,44 @@ router.get('/', async (req, res) => {
 
 // 게시글 등록 resizeURL구현해야함
 router.post('/', midware, upload.single('image'), async (req, res) => {
-      try {
-        const { user } = res.locals; 
-        const { content } = req.body;
-        const postDate = new Date();
-        const insertDt = postDate.toFormat('YYYY-MM-DD HH24:MI:SS')
-        if (req.file) {
-          const originalUrl = req.file.location; 
-        //   const resizeUrl = originalUrl.replace(/\/original\//, '/thumb/');
-          const post = await posts.create({ 
-              userId: user.userId, 
-              content: content, 
-              image: originalUrl, 
-              insertDt: insertDt, 
-              userName: user.userName});
-          res.send({ post: post, user: user, result: 'success' });
-        } else {
-          const post = await posts.create({ 
-              userId: user.userId, 
-              content: content, 
-              image: '', 
-              insertDt: insertDt, 
-              userName: user.userName});
-          res.send({ post: post, user: user, result: 'success' });
-        } 
-      } catch (error) {
-        console.log(error)
-        res.status(401).send({ result: 'fail', errorMessage: '게시글 작성에 실패하였습니다.' });
-      }
-    });
+  try {
+    const { user } = res.locals;
+    const { content } = req.body;
+    const postDate = new Date();
+    const insertDt = postDate.toFormat('YYYY-MM-DD HH24:MI:SS');
+    if (req.file) {
+      const originalUrl = req.file.location;
+      //   const resizeUrl = originalUrl.replace(/\/original\//, '/thumb/');
+      const post = await posts.create({
+        userId: user.userId,
+        content: content,
+        image: originalUrl,
+        insertDt: insertDt,
+        userName: user.userName,
+      });
+      res.send({ post: post, user: user, result: 'success' });
+    } else {
+      const post = await posts.create({
+        userId: user.userId,
+        content: content,
+        image: '',
+        insertDt: insertDt,
+        userName: user.userName,
+      });
+      res.send({ post: post, user: user, result: 'success' });
+    }
+  } catch (error) {
+    console.log(error);
+    res
+      .status(401)
+      .send({ result: 'fail', errorMessage: '게시글 작성에 실패하였습니다.' });
+  }
+});
 
 // 게시글 수정
 router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
-    try {
-    const s3 = new AWS.S3(); 
+  try {
+    const s3 = new AWS.S3();
     const postId = req.params.postId;
     const { userId } = res.locals.user;
     const { content } = req.body;
@@ -137,14 +140,12 @@ router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
         res.status(400).send({ result: '게시글 수정 실패 되었습니다.' });
       }
     } else {
-        const postInfo = await posts.findOne({ where: { postId, userId } });
-        if (postInfo) {
-        await postInfo.update(
-            {
-            content: content,
-            image: ''
-            }
-        );
+      const postInfo = await posts.findOne({ where: { postId, userId } });
+      if (postInfo) {
+        await postInfo.update({
+          content: content,
+          image: '',
+        });
         res.send({ result: '게시글을 수정하였습니다.' });
       } else {
         res
@@ -161,50 +162,53 @@ router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
 
 // 게시글 삭제
 router.delete('/:postId', midware, async (req, res) => {
-    try {
-      const s3 = new AWS.S3(); 
-      const postId = req.params.postId;
-      const { userId } = res.locals.user; 
-      const postInfo = await posts.findOne({ where: { postId, userId } });
-      if (postInfo) {
-        const beforeImage = postInfo.image.split('/')[4];
-        const s3 = new AWS.S3();
-        s3.deleteObject({
-            Bucket: process.env.bucket,
-            Key: `original/${beforeImage}`,
-            },
-            (err, data) => {
-            if (err) { throw err; }
-            }
-        );
-        // s3.deleteObject({
-        //     Bucket: process.env.bucket,
-        //     Key: `thumb/${beforeImage}`,
-        //     },
-        //     (err, data) => {
-        //     if (err) { throw err; }
-        //     }
-        // );
-        await posts.destroy({where: {postId:postId}});
-        res.send({ result: '게시글이 삭제되었습니다!' });
-      } else {
-        res.status(401).send({
-          errorMessage: '삭제할수 없는 게시물입니다!',
-        });
-      }
-    } catch (error) {
-      console.log(error)
-      res.status(400).send({
-        errorMessage: '게시글 삭제에 실패했습니다!',
+  try {
+    const s3 = new AWS.S3();
+    const postId = req.params.postId;
+    const { userId } = res.locals.user;
+    const postInfo = await posts.findOne({ where: { postId, userId } });
+    if (postInfo) {
+      const beforeImage = postInfo.image.split('/')[4];
+      const s3 = new AWS.S3();
+      s3.deleteObject(
+        {
+          Bucket: process.env.bucket,
+          Key: `original/${beforeImage}`,
+        },
+        (err, data) => {
+          if (err) {
+            throw err;
+          }
+        }
+      );
+      // s3.deleteObject({
+      //     Bucket: process.env.bucket,
+      //     Key: `thumb/${beforeImage}`,
+      //     },
+      //     (err, data) => {
+      //     if (err) { throw err; }
+      //     }
+      // );
+      await posts.destroy({ where: { postId: postId } });
+      res.send({ result: '게시글이 삭제되었습니다!' });
+    } else {
+      res.status(401).send({
+        errorMessage: '삭제할수 없는 게시물입니다!',
       });
     }
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({
+      errorMessage: '게시글 삭제에 실패했습니다!',
+    });
+  }
 });
 
 router.get('/:postId', async (req, res) => {
   const postId = req.params.postId;
   try {
     let postDetail = await posts.findOne({ where: { postId } });
-    const commentget = await cget.commentget(postId)
+    const commentget = await cget.commentget(postId);
     postDetail.dataValues.comment = commentget;
     if (postDetail) {
       res.send({ postDetail: postDetail });
@@ -219,6 +223,5 @@ router.get('/:postId', async (req, res) => {
     });
   }
 });
-
 
 module.exports = router;

@@ -81,6 +81,7 @@ router.post(
           result: 'success',
         });
       } else {
+        //이미지 값이 있으면!!!
         pw = saltAppointed(pw);
         //salt값 같이 저장해야함. 없으면 로그인 시 비교불가
         await users.create({
