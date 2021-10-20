@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { posts, sequelize, Sequelize } = require('../models');
+const { posts, sequelize, Sequelize, deleposts } = require('../models');
 // const authMiddleware = require('../middlewares/middels');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
@@ -163,32 +163,34 @@ router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
 // 게시글 삭제
 router.delete('/:postId', midware, async (req, res) => {
   try {
-    const s3 = new AWS.S3();
     const postId = req.params.postId;
     const { userId } = res.locals.user;
     const postInfo = await posts.findOne({ where: { postId, userId } });
     if (postInfo) {
       const beforeImage = postInfo.image.split('/')[4];
       const s3 = new AWS.S3();
-      s3.deleteObject(
-        {
-          Bucket: process.env.bucket,
-          Key: `original/${beforeImage}`,
-        },
-        (err, data) => {
-          if (err) {
-            throw err;
-          }
-        }
-      );
-      // s3.deleteObject({
+      // s3.deleteObject(
+      //   {
       //     Bucket: process.env.bucket,
-      //     Key: `thumb/${beforeImage}`,
-      //     },
-      //     (err, data) => {
-      //     if (err) { throw err; }
+      //     Key: `original/${beforeImage}`,
+      //   },
+      //   (err, data) => {
+      //     if (err) {
+      //       throw err;
       //     }
+      //   }
       // );
+      // INSERT INTO 복사할테이블명 SELECT * FROM 복사할테이블명 [WHERE 절]
+
+
+      
+      const post = 'INSERT INTO deleposts SELECT * FROM posts WHERE postId = postId;';
+      await sequelize.query(post, {
+        replacements: { 
+            postId : postId
+          },
+            type: sequelize.QueryTypes.INSERT
+        });
       await posts.destroy({ where: { postId: postId } });
       res.send({ result: '게시글이 삭제되었습니다!' });
     } else {
@@ -223,5 +225,43 @@ router.get('/:postId', async (req, res) => {
     });
   }
 });
+
+router.delete('/todelepost/:postId', midware, async (req, res) => {
+  try {
+    const postId = req.params.postId;
+    const postInfo = await deleposts.findOne({ where: { postId } });
+    if (postInfo) {
+      const beforeImage = postInfo.image.split('/')[4];
+      const s3 = new AWS.S3();
+      s3.deleteObject(
+        {
+          Bucket: process.env.bucket,
+          Key: `original/${beforeImage}`,
+        },
+        (err, data) => {
+          if (err) {
+            throw err;
+          }
+        }
+      );
+      await deleposts.destroy({ where: { postId: postId } });
+      res.send({ result: '게시글이 삭제되었습니다!' });
+    } else {
+      res.status(401).send({
+        errorMessage: '삭제할수 없는 게시물입니다!',
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({
+      errorMessage: '게시글 삭제에 실패했습니다!',
+    });
+  }
+});
+
+
+
+
+
 
 module.exports = router;
