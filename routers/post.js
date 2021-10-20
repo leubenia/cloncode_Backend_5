@@ -50,7 +50,7 @@ router.get('/', async (req, res) => {
       const likesget = await cget.likeget(post.postId);
       post.likeCnt = likesget.length;
     }
-    res.send({ result: posts });
+    res.send({ posts: posts });
   } catch (error) {
     console.log(`${req.method} ${req.originalUrl} : ${error.message}`);
     res.status(400).send({
@@ -199,5 +199,26 @@ router.delete('/:postId', midware, async (req, res) => {
       });
     }
 });
+
+router.get('/:postId', async (req, res) => {
+  const postId = req.params.postId;
+  try {
+    let postDetail = await posts.findOne({ where: { postId } });
+    const commentget = await cget.commentget(postId)
+    postDetail.dataValues.comment = commentget;
+    if (postDetail) {
+      res.send({ postDetail: postDetail });
+    } else {
+      res.status(401).send({
+        errorMessage: '조회할수 있는 게시물이 없습니다.',
+      });
+    }
+  } catch (error) {
+    res.status(400).send({
+      errorMessage: '게시물 상세조회에 실패 했습니다.',
+    });
+  }
+});
+
 
 module.exports = router;
