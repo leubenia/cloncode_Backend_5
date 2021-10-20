@@ -1,12 +1,11 @@
-const jwt = require("jsonwebtoken");
-const { sequelize } = require("../models");
-
+const jwt = require('jsonwebtoken');
+const { sequelize } = require('../models');
 
 module.exports = async (req, res, next) => {
-
+  console.log(req.headers);
   const location = 'x-auth-token';
   const token = req.headers[location];
- 
+
   console.log(token);
 
   console.log('미들웨어 사용함');
@@ -14,8 +13,8 @@ module.exports = async (req, res, next) => {
     if (token) {
       const decoded = jwt.verify(token, process.env.SECRET_KEY);
       let users;
-      console.log(decoded)
-      const post = "SELECT * FROM users WHERE email = :email";
+      console.log(decoded);
+      const post = 'SELECT * FROM users WHERE email = :email';
       const results = await sequelize.query(post, {
         replacements: { email: decoded.email },
         type: sequelize.QueryTypes.SELECT,
