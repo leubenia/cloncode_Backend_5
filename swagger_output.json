@@ -34,11 +34,11 @@
     "https"
   ],
   "securityDefinitions": {
-    "Bearer": {
+    "token": {
       "type": "apiKey",
-      "name": "Authorization",
+      "name": "x-auth-token",
       "in": "header",
-      "description": "send JWT"
+      "description": "로그인 이후 토큰을 여기다가 넣으세요~!"
     }
   },
   "consumes": [],
@@ -146,18 +146,19 @@
         "description": "",
         "parameters": [
           {
-            "name": "obj",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "content": {
-                  "example": "any"
-                }
-              }
-            }
+            "in": "formData",
+            "name": "image",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "in": "formData",
+            "name": "content",
+            "required": true,
+            "type": "string"
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "401": {
             "description": "Unauthorized"
@@ -189,6 +190,7 @@
             }
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "400": {
             "description": "Bad Request"
@@ -209,6 +211,7 @@
             "type": "string"
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "400": {
             "description": "Bad Request"
@@ -263,6 +266,7 @@
             }
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "200": {
             "description": "OK"
@@ -288,6 +292,7 @@
             "type": "string"
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "200": {
             "description": "OK"
@@ -323,6 +328,7 @@
             }
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "200": {
             "description": "OK"
@@ -357,6 +363,7 @@
             }
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "200": {
             "description": "OK"
