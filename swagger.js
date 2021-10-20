@@ -9,8 +9,7 @@ const doc = {
   host: '3.34.255.91', //배포 하려고 하는 host에 맞춰줘야 동작함
   basePath: '/',
   schemes: ['http', 'https'],
-  consumes: ['application/json'],
-  produces: ['application/json'],
+
   tags: [
     {
       name: 'Login',

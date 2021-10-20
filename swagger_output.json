@@ -7,18 +7,6 @@
   },
   "host": "3.34.255.91",
   "basePath": "/",
-  "components": {
-    "securitySchemes": {
-      "Bearer": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
-    }
-  },
-  "security": [{
-    "Bearer": []
-  }], 
   "tags": [
     {
       "name": "Login",
@@ -53,12 +41,8 @@
       "description": "send JWT"
     }
   },
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
+  "consumes": [],
+  "produces": [],
   "paths": {
     "/api/signup": {
       "post": {
@@ -66,28 +50,40 @@
         "description": "",
         "parameters": [
           {
-            "name": "obj",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "userName": {
-                  "example": "any"
-                },
-                "email": {
-                  "example": "any"
-                },
-                "birthday": {
-                  "example": "any"
-                },
-                "gender": {
-                  "example": "any"
-                },
-                "pw": {
-                  "example": "any"
-                }
-              }
-            }
+            "in": "formData",
+            "name": "profile",
+            "required": false,
+            "type": "file"
+          },
+          {
+            "in": "formData",
+            "name": "userName",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "email",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "birthday",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "gender",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "pw",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -203,6 +199,26 @@
         }
       },
       "delete": {
+        "tags": ["Post"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "get": {
         "tags": ["Post"],
         "description": "",
         "parameters": [
