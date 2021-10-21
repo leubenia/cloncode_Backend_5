@@ -1,0 +1,40 @@
+'use strict';
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.createTable('deleposts', {
+      postId: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER,
+      },
+      userId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'userId',
+        },
+        onDelete: 'cascade',
+      },
+      content: {
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
+      userName: {
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
+      insertDt: {
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
+      image: {
+        type: Sequelize.STRING,
+      },
+    });
+  },
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.dropTable('deleposts');
+  },
+};

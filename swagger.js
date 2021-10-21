@@ -9,7 +9,6 @@ const doc = {
   host: '3.34.255.91', //배포 하려고 하는 host에 맞춰줘야 동작함
   basePath: '/',
   schemes: ['http', 'https'],
-
   tags: [
     {
       name: 'Login',
@@ -32,14 +31,6 @@ const doc = {
       description: '좋아요',
     },
   ],
-  securityDefinitions: {
-    Bearer: {
-      type: 'apiKey',
-      name: 'Authorization',
-      in: 'header',
-      description: 'send JWT',
-    },
-  },
 };
 
 const outputFile = './swagger_output.json';

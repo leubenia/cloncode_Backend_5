@@ -2,10 +2,10 @@
   "swagger": "2.0",
   "info": {
     "version": "1.0.0",
-    "title": "5조 얼굴책 API",
+    "title": "8조 API",
     "description": "Description"
   },
-  "host": "localhost:3000",
+  "host": "3.34.255.91",
   "basePath": "/",
   "tags": [
     {
@@ -31,10 +31,11 @@
   ],
   "schemes": ["http", "https"],
   "securityDefinitions": {
-    "ApiKeyAuth": {
+    "token": {
       "type": "apiKey",
       "name": "x-auth-token",
-      "in": "header"
+      "in": "header",
+      "description": "로그인 이후 토큰을 여기다가 넣으세요~!"
     }
   },
   "security": [{
@@ -145,18 +146,19 @@
         "description": "",
         "parameters": [
           {
-            "name": "obj",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "content": {
-                  "example": "any"
-                }
-              }
-            }
+            "in": "formData",
+            "name": "image",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "in": "formData",
+            "name": "content",
+            "required": true,
+            "type": "string"
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "401": {
             "description": "Unauthorized"
@@ -188,6 +190,7 @@
             }
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "400": {
             "description": "Bad Request"
@@ -208,6 +211,7 @@
             "type": "string"
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "400": {
             "description": "Bad Request"
@@ -262,6 +266,7 @@
             }
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "200": {
             "description": "OK"
@@ -287,6 +292,7 @@
             "type": "string"
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "200": {
             "description": "OK"
@@ -322,6 +328,7 @@
             }
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "200": {
             "description": "OK"
@@ -356,6 +363,7 @@
             }
           }
         ],
+        "security": [{ "token": [] }],
         "responses": {
           "200": {
             "description": "OK"
@@ -365,6 +373,7 @@
           },
           "401": {
             "description": "Unauthorized"
+
           }
         }
       }
