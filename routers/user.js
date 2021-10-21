@@ -61,6 +61,7 @@ router.post(
       }
 
       if (req.file) {
+        console.log('이미지 값 있음');
         //이미지 값이 있으면!!!
         const originalUrl = req.file.location;
         const resizeUrl = originalUrl.replace(/\/original\//, '/thumb/');
@@ -81,8 +82,9 @@ router.post(
           result: 'success',
         });
       } else {
+        console.log('이미지 값 없음');
         //이미지 값이 있으면!!!
-        pw = saltAppointed(pw);
+        pw = saltAppointed(pw, salt);
         //salt값 같이 저장해야함. 없으면 로그인 시 비교불가
         await users.create({
           userName: userName,
@@ -116,6 +118,7 @@ router.post('/login', Validator('login'), async (req, res) => {
     if (!user) {
       res.status(400).send({
         result: 'fail',
+        errorMessage: '찾으시는 아이디가 없습니다.',
       });
     }
     //계정별 저장되어있는 salt값을 활용해서 해시화
