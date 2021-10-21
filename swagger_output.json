@@ -5,7 +5,7 @@
     "title": "5조 얼굴책 API",
     "description": "Description"
   },
-  "host": "3.34.255.91",
+  "host": "localhost:3000",
   "basePath": "/",
   "tags": [
     {
@@ -29,18 +29,17 @@
       "description": "좋아요"
     }
   ],
-  "schemes": [
-    "http",
-    "https"
-  ],
+  "schemes": ["http", "https"],
   "securityDefinitions": {
-    "Bearer": {
+    "ApiKeyAuth": {
       "type": "apiKey",
-      "name": "Authorization",
-      "in": "header",
-      "description": "send JWT"
+      "name": "x-auth-token",
+      "in": "header"
     }
   },
+  "security": [{
+    "ApiKeyAuth": []
+  }], 
   "consumes": [],
   "produces": [],
   "paths": {
