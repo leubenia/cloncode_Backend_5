@@ -35,7 +35,13 @@ module.exports = async (req, res, next) => {
     }
   } catch (err) {
     console.log(err);
-    res.status(401).send({ errorMessage: '로그인이 필요합니다' });
+    if (err.name === 'TokenExpiredError') { 
+      res.status(401).send({ errorMessage: '토큰의 만료시간이 다되었습니다. 다시 로그인부탁드립니다.' }); 
+      return null 
+    }else{
+      res.status(401).send({ errorMessage: '로그인이 필요합니다' });
+    }
+    
 
     return;
   }
