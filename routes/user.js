@@ -29,8 +29,8 @@ const upload = multer({
 });
 
 //회원가입
-router.post('/signup', upload.single('profile'), Validator('signup'), signup);
-//로그인
-router.post('/login', Validator('login'), login);
+// router.post('/signup', upload.single('profile'), Validator('signup'), signup);
+// //로그인
+// router.post('/login', Validator('login'), login);
 
 module.exports = router;
