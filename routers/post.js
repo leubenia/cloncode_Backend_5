@@ -30,8 +30,9 @@ const upload = multer({
 });
 
 // 게시물 조회, 좋아요 기능 추가해야 함.
-router.get('/', async (req, res) => {
+router.get('/',midware ,async (req, res) => {
   try {
+    const { user } = res.locals;
     const userId_join = `
       SELECT p.*, u.profile 
       FROM posts AS p 
@@ -48,6 +49,7 @@ router.get('/', async (req, res) => {
       post.commentCnt = commentget.length;
       const likesget = await cget.likeget(post.postId);
       post.likeCnt = likesget.length;
+      if(user){post.like = likesget.some(like => like.userId === user.userId);}
     }
     res.send({ posts: posts });
   } catch (error) {
