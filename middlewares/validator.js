@@ -12,7 +12,7 @@ module.exports = function (validator) {
     try {
       console.log('검사중이야');
       console.log(req.body);
-      const validated = await Validators[validator].validateAsync(req.body);
+      const validated = await Validators[validator].validatedAsync(req.body);
 
       req.body = validated;
       console.log('검사완료');
