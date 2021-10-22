@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { posts, sequelize, Sequelize, deleposts } = require('../models');
+const { posts, sequelize, Sequelize, deleposts, users, comments, likes } = require('../models');
 // const authMiddleware = require('../middlewares/middels');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
@@ -271,6 +271,23 @@ router.delete('/todelepost/:postId', midware, async (req, res) => {
   }
 });
 
+router.get('/testdo/aa',midware ,async (req, res) => {
+  try {
+    const { user } = res.locals;
+    const post = await posts.findAll(
+      { include: users },
+      {
+        include: comments
+    });
+    // console.log(post)
+    res.send({ is: post });
+  } catch (error) {
+    console.log(`${req.method} ${req.originalUrl} : ${error.message}`);
+    res.status(400).send({
+      errorMessage: '전체 게시글 조회에 실패했습니다.',
+    });
+  }
+});
 
 
 module.exports = router;
