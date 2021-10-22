@@ -29,10 +29,7 @@
       "description": "좋아요"
     }
   ],
-  "schemes": [
-    "http",
-    "https"
-  ],
+  "schemes": ["http", "https"],
   "securityDefinitions": {
     "token": {
       "type": "apiKey",
@@ -41,6 +38,9 @@
       "description": "로그인 이후 토큰을 여기다가 넣으세요~!"
     }
   },
+  "security": [{
+    "ApiKeyAuth": []
+  }], 
   "consumes": [],
   "produces": [],
   "paths": {
