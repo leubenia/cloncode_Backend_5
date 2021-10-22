@@ -12,10 +12,18 @@ module.exports = function (validator) {
     try {
       console.log('검사중이야');
       console.log(req.body);
-      console.log(validator);
 
-      const validated = await Validators[validator].validateAsync(req.body);
+      const { error, validated } = await Validators[validator].validate(
+        req.body
+      );
       console.log(error);
+      if (error) {
+        res.status(401).send({
+          result: 'fail',
+          errorMessage: error.message,
+        });
+        return;
+      }
       req.body = validated;
       console.log('검사완료');
       next();

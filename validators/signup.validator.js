@@ -1,43 +1,33 @@
 const Joi = require('joi');
 
 const signupSchema = Joi.object({
-  email: Joi.string()
-    .email()
-    .required()
-    .error(() => {
-      return {
-        message: '이메일이 잘못되었습니다.',
-      };
-    }),
-  userName: Joi.string()
-    .required()
-    .error(() => {
-      return {
-        message: '유저네임이 잘못되었습니다.',
-      };
-    }),
-  pw: Joi.string()
-    .min(4)
-    .required()
-    .error(() => {
-      return {
-        message: '패스워드가 잘못되었습니다.',
-      };
-    }),
-  birthday: Joi.string()
-    .required()
-    .error(() => {
-      return {
-        message: '생일이 잘못되었습니다.',
-      };
-    }),
-  gender: Joi.string()
-    .required()
-    .error(() => {
-      return {
-        message: '성별이 잘못되었습니다.',
-      };
-    }),
+  email: Joi.string().email().required().messages({
+    'string.email': `메일형식이 잘못되었습니다.`,
+    'string.empty': `"a" cannot be an empty field`,
+    'any.required': `"a" is a required field`,
+    'string.base': `"a" should be a type of 'text'`,
+  }),
+  userName: Joi.string().required().messages({
+    'string.empty': `"a" cannot be an empty field`,
+    'any.required': `"a" is a required field`,
+    'string.base': `"a" should be a type of 'text'`,
+  }),
+  pw: Joi.string().min(4).required().messages({
+    'string.min': `최소 네자리 수 이상이어야 합니다.`,
+    'string.empty': `"a" cannot be an empty field`,
+    'any.required': `"a" is a required field`,
+    'string.base': `"a" should be a type of 'text'`,
+  }),
+  birthday: Joi.string().required().messages({
+    'string.empty': `"a" cannot be an empty field`,
+    'any.required': `"a" is a required field`,
+    'string.base': `"a" should be a type of 'text'`,
+  }),
+  gender: Joi.string().required().messages({
+    'string.empty': `"a" cannot be an empty field`,
+    'any.required': `"a" is a required field`,
+    'string.base': `"a" should be a type of 'text'`,
+  }),
 }).unknown();
 
 module.exports = signupSchema;
