@@ -167,8 +167,8 @@ router.delete('/:postId', midware, async (req, res) => {
     const { userId } = res.locals.user;
     const postInfo = await posts.findOne({ where: { postId, userId } });
     if (postInfo) {
-      const beforeImage = postInfo.image.split('/')[4];
-      const s3 = new AWS.S3();
+      // const beforeImage = postInfo.image.split('/')[4];
+      // const s3 = new AWS.S3();
       // s3.deleteObject(
       //   {
       //     Bucket: process.env.bucket,
@@ -182,9 +182,7 @@ router.delete('/:postId', midware, async (req, res) => {
       // );
       // INSERT INTO 복사할테이블명 SELECT * FROM 복사할테이블명 [WHERE 절]
 
-
-      
-      const post = 'INSERT INTO deleposts SELECT * FROM posts WHERE postId = postId;';
+      const post = 'INSERT INTO deleposts SELECT * FROM posts WHERE postId = :postId;';
       await sequelize.query(post, {
         replacements: { 
             postId : postId
