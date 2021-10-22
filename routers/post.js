@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { posts, sequelize, Sequelize } = require('../models');
+const { posts, sequelize, Sequelize, deleposts } = require('../models');
 // const authMiddleware = require('../middlewares/middels');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
@@ -9,7 +9,6 @@ const path = require('path');
 const midware = require('../middlewares/middles');
 const cget = require('./funpost');
 require('date-utils');
-
 
 AWS.config.update({
   accessKeyId: process.env.accessKeyId,
@@ -31,8 +30,9 @@ const upload = multer({
 });
 
 // 게시물 조회, 좋아요 기능 추가해야 함.
-router.get('/', async (req, res) => {
+router.get('/',midware ,async (req, res) => {
   try {
+    const { user } = res.locals;
     const userId_join = `
       SELECT p.*, u.profile 
       FROM posts AS p 
@@ -44,13 +44,14 @@ router.get('/', async (req, res) => {
       type: Sequelize.QueryTypes.SELECT,
     });
     for (post of posts) {
-      const commentget = await cget.commentget(post.postId)
+      const commentget = await cget.commentget(post.postId);
       post.comment = commentget;
       post.commentCnt = commentget.length;
       const likesget = await cget.likeget(post.postId);
       post.likeCnt = likesget.length;
+      if(user){post.like = likesget.some(like => like.userId === user.userId);}
     }
-    res.send({ result: posts });
+    res.send({ posts: posts });
   } catch (error) {
     console.log(`${req.method} ${req.originalUrl} : ${error.message}`);
     res.status(400).send({
@@ -61,45 +62,49 @@ router.get('/', async (req, res) => {
 
 // 게시글 등록 resizeURL구현해야함
 router.post('/', midware, upload.single('image'), async (req, res) => {
-      try {
-        const { user } = res.locals; 
-        const { content } = req.body;
-        const postDate = new Date();
-        const insertDt = postDate.toFormat('YYYY-MM-DD HH24:MI:SS')
-        if (req.file) {
-          const originalUrl = req.file.location; 
-        //   const resizeUrl = originalUrl.replace(/\/original\//, '/thumb/');
-          const post = await posts.create({ 
-              userId: user.userId, 
-              content: content, 
-              image: originalUrl, 
-              insertDt: insertDt, 
-              userName: user.userName});
-          res.send({ post: post, user: user, result: 'success' });
-        } else {
-          const post = await posts.create({ 
-              userId: user.userId, 
-              content: content, 
-              image: '', 
-              insertDt: insertDt, 
-              userName: user.userName});
-          res.send({ post: post, user: user, result: 'success' });
-        } 
-      } catch (error) {
-        console.log(error)
-        res.status(401).send({ result: 'fail', errorMessage: '게시글 작성에 실패하였습니다.' });
-      }
-    });
+  try {
+    const { user } = res.locals;
+    const { content } = req.body;
+    const postDate = new Date();
+    const insertDt = postDate.toFormat('YYYY-MM-DD HH24:MI:SS');
+    if (req.file) {
+      const originalUrl = req.file.location;
+      //   const resizeUrl = originalUrl.replace(/\/original\//, '/thumb/');
+      const post = await posts.create({
+        userId: user.userId,
+        content: content,
+        image: originalUrl,
+        insertDt: insertDt,
+        userName: user.userName,
+      });
+      res.send({ post: post, user: user, result: 'success' });
+    } else {
+      const post = await posts.create({
+        userId: user.userId,
+        content: content,
+        image: '',
+        insertDt: insertDt,
+        userName: user.userName,
+      });
+      res.send({ post: post, user: user, result: 'success' });
+    }
+  } catch (error) {
+    console.log(error);
+    res
+      .status(401)
+      .send({ result: 'fail', errorMessage: '게시글 작성에 실패하였습니다.' });
+  }
+});
 
 // 게시글 수정
 router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
-    try {
-    const s3 = new AWS.S3(); 
+  try {
+    const s3 = new AWS.S3();
     const postId = req.params.postId;
-    const { userId } = res.locals.user;
+    const { user } = res.locals;
     const { content } = req.body;
     if (req.file) {
-      const postInfo = await posts.findOne({ where: { postId, userId } });
+      const postInfo = await posts.findOne({ where: { postId : postId, userId : user.userId } });
       if (postInfo) {
         const beforeImage = postInfo.image.split('/')[4];
 
@@ -125,27 +130,40 @@ router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
 
         const originalUrl = req.file.location;
 
-        await posts.update(
+        const post = await posts.update(
           {
             content: content,
             image: originalUrl,
           },
-          { where: { postId: postId, userId: userId } }
+          { where: { postId: postId, userId: user.userId } }
         );
-        res.send({ result: '게시글을 수정하였습니다.' });
+        const commentget = await cget.commentget(post.postId);
+        post.comment = commentget;
+        post.commentCnt = commentget.length;
+        const likesget = await cget.likeget(post.postId);
+        post.likeCnt = likesget.length;
+        if(user){post.like = likesget.some(like => like.userId === user.userId);}
+
+        res.send({ post: post, user: user, result: 'success' });
       } else {
         res.status(400).send({ result: '게시글 수정 실패 되었습니다.' });
       }
     } else {
-        const postInfo = await posts.findOne({ where: { postId, userId } });
-        if (postInfo) {
-        await postInfo.update(
-            {
-            content: content,
-            image: ''
-            }
-        );
-        res.send({ result: '게시글을 수정하였습니다.' });
+      const postInfo = await posts.findOne({ where: { postId: postId, userId: user.userId } });
+      if (postInfo) {
+        const post = await postInfo.update({
+          content: content,
+          image: '',
+        });
+        const commentget = await cget.commentget(post.postId);
+        post.dataValues.comment = commentget;
+        post.dataValues.commentCnt = commentget.length;
+        const likesget = await cget.likeget(post.postId);
+        post.dataValues.likeCnt = likesget.length;
+        if(user){post.dataValues.like = likesget.some(like => like.userId === user.userId);}
+
+        console.log(post)
+        res.send({ post: post, user: user, result: 'success' });
       } else {
         res
           .status(401)
@@ -161,43 +179,104 @@ router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
 
 // 게시글 삭제
 router.delete('/:postId', midware, async (req, res) => {
-    try {
-      const s3 = new AWS.S3(); 
-      const postId = req.params.postId;
-      const { userId } = res.locals.user; 
-      const postInfo = await posts.findOne({ where: { postId, userId } });
-      if (postInfo) {
-        const beforeImage = postInfo.image.split('/')[4];
-        const s3 = new AWS.S3();
-        s3.deleteObject({
-            Bucket: process.env.bucket,
-            Key: `original/${beforeImage}`,
-            },
-            (err, data) => {
-            if (err) { throw err; }
-            }
-        );
-        // s3.deleteObject({
-        //     Bucket: process.env.bucket,
-        //     Key: `thumb/${beforeImage}`,
-        //     },
-        //     (err, data) => {
-        //     if (err) { throw err; }
-        //     }
-        // );
-        await posts.destroy({where: {postId:postId}});
-        res.send({ result: '게시글이 삭제되었습니다!' });
-      } else {
-        res.status(401).send({
-          errorMessage: '삭제할수 없는 게시물입니다!',
+  try {
+    const postId = req.params.postId;
+    const { userId } = res.locals.user;
+    const postInfo = await posts.findOne({ where: { postId, userId } });
+    if (postInfo) {
+      // const beforeImage = postInfo.image.split('/')[4];
+      // const s3 = new AWS.S3();
+      // s3.deleteObject(
+      //   {
+      //     Bucket: process.env.bucket,
+      //     Key: `original/${beforeImage}`,
+      //   },
+      //   (err, data) => {
+      //     if (err) {
+      //       throw err;
+      //     }
+      //   }
+      // );
+      // INSERT INTO 복사할테이블명 SELECT * FROM 복사할테이블명 [WHERE 절]
+
+      const post = 'INSERT INTO deleposts SELECT * FROM posts WHERE postId = :postId;';
+      await sequelize.query(post, {
+        replacements: { 
+            postId : postId
+          },
+            type: sequelize.QueryTypes.INSERT
         });
-      }
-    } catch (error) {
-      console.log(error)
-      res.status(400).send({
-        errorMessage: '게시글 삭제에 실패했습니다!',
+      await posts.destroy({ where: { postId: postId } });
+      res.send({ result: '게시글이 삭제되었습니다!' });
+    } else {
+      res.status(401).send({
+        errorMessage: '삭제할수 없는 게시물입니다!',
       });
     }
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({
+      errorMessage: '게시글 삭제에 실패했습니다!',
+    });
+  }
 });
+
+router.get('/:postId', async (req, res) => {
+  const postId = req.params.postId;
+  try {
+    let postDetail = await posts.findOne({ where: { postId } });
+    const commentget = await cget.commentget(postId);
+    postDetail.dataValues.comment = commentget;
+    if (postDetail) {
+      res.send({ postDetail: postDetail });
+    } else {
+      res.status(401).send({
+        errorMessage: '조회할수 있는 게시물이 없습니다.',
+      });
+    }
+  } catch (error) {
+    res.status(400).send({
+      errorMessage: '게시물 상세조회에 실패 했습니다.',
+    });
+  }
+});
+
+router.delete('/todelepost/:postId', midware, async (req, res) => {
+  try {
+    const postId = req.params.postId;
+    const postInfo = await deleposts.findOne({ where: { postId } });
+    if (postInfo) {
+      const beforeImage = postInfo.image.split('/')[4];
+      const s3 = new AWS.S3();
+      s3.deleteObject(
+        {
+          Bucket: process.env.bucket,
+          Key: `original/${beforeImage}`,
+        },
+        (err, data) => {
+          if (err) {
+            throw err;
+          }
+        }
+      );
+      await deleposts.destroy({ where: { postId: postId } });
+      res.send({ result: '게시글이 삭제되었습니다!' });
+    } else {
+      res.status(401).send({
+        errorMessage: '삭제할수 없는 게시물입니다!',
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({
+      errorMessage: '게시글 삭제에 실패했습니다!',
+    });
+  }
+});
+
+
+
+
+
 
 module.exports = router;

@@ -6,6 +6,6 @@ const signupSchema = Joi.object({
   pw: Joi.string().min(4).required(),
   birthday: Joi.string().required(),
   gender: Joi.string().required(),
-});
+}).unknown();
 
 module.exports = signupSchema;

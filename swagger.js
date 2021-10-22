@@ -1,46 +1,40 @@
-const swaggerAutogen = require("swagger-autogen")();
+const swaggerAutogen = require('swagger-autogen')();
 
 const doc = {
   info: {
-    version: "1.0.0",
-    title: "8조 API",
-    description: "Description",
+    version: '1.0.0',
+    title: '5조 얼굴책 API',
+    description: 'Description',
   },
-  host: "3.34.255.91", //배포 하려고 하는 host에 맞춰줘야 동작함
-  basePath: "/",
-  schemes: ["http", "https"],
-  consumes: ["application/json"],
-  produces: ["application/json"],
+  host: '3.34.255.91', //배포 하려고 하는 host에 맞춰줘야 동작함
+  basePath: '/',
+  schemes: ['http', 'https'],
   tags: [
     {
-      name: "Login",
-      description: "로그인",
+      name: 'Login',
+      description: '로그인',
     },
     {
-      name: "User",
-      description: "회원가입",
+      name: 'User',
+      description: '회원가입',
     },
     {
-      name: "Post",
-      description: "게시판",
+      name: 'Post',
+      description: '게시판',
     },
     {
-      name: "reply",
-      description: "댓글",
+      name: 'reply',
+      description: '댓글',
+    },
+    {
+      name: 'Like',
+      description: '좋아요',
     },
   ],
-  securityDefinitions: {
-    Bearer: {
-      type: "apiKey",
-      name: "Authorization",
-      in: "header",
-      description: "send JWT",
-    },
-  },
 };
 
-const outputFile = "./swagger_output.json";
-const endpointsFiles = ["./app.js"];
+const outputFile = './swagger_output.json';
+const endpointsFiles = ['./app.js'];
 // const endpointsFiles = ['./app.js'];
 
 swaggerAutogen(outputFile, endpointsFiles, doc);
