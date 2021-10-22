@@ -60,7 +60,7 @@ face book clone coding
  <h3>2.model관계설정</h3>
  ORM sequelize를 사용했는데 첫날 model 관계 설정에 에러사항이 있엇다. 
  관계들을 명확히 설정하고 필요한 컬럼들을 초기부터 최대한 완벽하게 설정하는게 좋을 듯 하다.
- <h3>3.swagger폼데어터 형식</h3>
+ <h3>3.swagger폼데이터 형식</h3>
  swagger autogen을 사용해 자동으로 생성하면 폼데이터 형식의 입력 값은 설정되지 않기때문에
  직접 설정을 해줘야 한다. 문법 자체를 swagger hub에서 검색을 하여 찾아서 설정하였다.
  <h3>4.test code 시에 mock을 사용한 return 값 설정하는부분</h3>
