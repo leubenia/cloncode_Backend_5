@@ -105,11 +105,8 @@ router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
     const { content } = req.body;
     if (req.file) {
       const postInfo = await posts.findOne({ where: { postId : postId, userId : user.userId } });
-      console.log(postInfo);
-      console.log("-------")
       if (postInfo) {
         const beforeImage = postInfo.image.split('/')[4];
-        console.log(beforeImage)
         s3.deleteObject(
           {
             Bucket: process.env.bucket,
@@ -131,7 +128,6 @@ router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
         // );
 
         const originalUrl = req.file.location;
-        console.log(originalUrl)
         const post = await postInfo.update(
           {
             content: content,
