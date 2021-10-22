@@ -101,10 +101,10 @@ router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
   try {
     const s3 = new AWS.S3();
     const postId = req.params.postId;
-    const { userId } = res.locals.user;
+    const { user } = res.locals;
     const { content } = req.body;
     if (req.file) {
-      const postInfo = await posts.findOne({ where: { postId, userId } });
+      const postInfo = await posts.findOne({ where: { postId : postId, userId : user.userId } });
       if (postInfo) {
         const beforeImage = postInfo.image.split('/')[4];
 
@@ -130,25 +130,40 @@ router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
 
         const originalUrl = req.file.location;
 
-        await posts.update(
+        const post = await posts.update(
           {
             content: content,
             image: originalUrl,
           },
-          { where: { postId: postId, userId: userId } }
+          { where: { postId: postId, userId: user.userId } }
         );
-        res.send({ result: '게시글을 수정하였습니다.' });
+        const commentget = await cget.commentget(post.postId);
+        post.comment = commentget;
+        post.commentCnt = commentget.length;
+        const likesget = await cget.likeget(post.postId);
+        post.likeCnt = likesget.length;
+        if(user){post.like = likesget.some(like => like.userId === user.userId);}
+
+        res.send({ post: post, user: user, result: 'success' });
       } else {
         res.status(400).send({ result: '게시글 수정 실패 되었습니다.' });
       }
     } else {
-      const postInfo = await posts.findOne({ where: { postId, userId } });
+      const postInfo = await posts.findOne({ where: { postId: postId, userId: user.userId } });
       if (postInfo) {
-        await postInfo.update({
+        const post = await postInfo.update({
           content: content,
           image: '',
         });
-        res.send({ result: '게시글을 수정하였습니다.' });
+        const commentget = await cget.commentget(post.postId);
+        post.dataValues.comment = commentget;
+        post.dataValues.commentCnt = commentget.length;
+        const likesget = await cget.likeget(post.postId);
+        post.dataValues.likeCnt = likesget.length;
+        if(user){post.dataValues.like = likesget.some(like => like.userId === user.userId);}
+
+        console.log(post)
+        res.send({ post: post, user: user, result: 'success' });
       } else {
         res
           .status(401)
