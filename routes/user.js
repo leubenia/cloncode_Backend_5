@@ -33,4 +33,5 @@ router.post('/signup', upload.single('profile'), Validator('signup'), signup);
 //로그인
 router.post('/login', Validator('login'), login);
 
+console.log('되돌리기 전');
 module.exports = router;
