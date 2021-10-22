@@ -88,6 +88,11 @@ face book clone coding
     "likeCnt": 6,
     "like": true
   },
+<h3>8. 게시물에 댓글과 좋아요를 리스트화 시켜서 프론트에 보낼때 생기는 문제</h3>
+게시물(post) response에 게미시물외에 댓글과 좋아요를 리스트화 시켜서 프론트에 보내줄때, commentget과 likesget를 선언해주고 값을 불러와서 게시물에 리스트화시켜서 보내주려고 했는데, 댓글과 좋아요는 포스트에 바로 연결되어 붙어 있는 항목이 아니라서 처음 시도할때는 값을 불러오지를 못했다. 하지만 터미널에서 게시물안에 있는 리스트를 확인을 했더니 dataValues라는 값 밑에 댓글과 좋아요 기능이 리스트화 되서 포함되어 있는 것을 확인을 해서 post.commment값이 아닌 post.dataValues.comment 이런 형식으로 dataValues를 가운데 넣어주어야 기능이 작동을 하였다.  
+
+
+
 
 
 
