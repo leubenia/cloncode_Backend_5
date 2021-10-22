@@ -34,6 +34,7 @@
     "sequelize-cli": "^6.2.0"
   },
   "devDependencies": {
+    "artillery": "^1.7.9",
     "jest": "^27.3.1",
     "prettier": "^2.4.1",
     "swagger-autogen": "^2.11.2",
