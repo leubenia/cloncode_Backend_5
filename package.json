@@ -5,11 +5,7 @@
   "main": "index.js",
   "scripts": {
     "prettify": "prettier --write .js **/.js",
-<<<<<<< HEAD
-    "test": "jest --detectOpenHandles --forceExit"
-=======
     "test": "jest"
->>>>>>> eungy
   },
   "repository": {
     "type": "git",
@@ -39,10 +35,6 @@
     "sequelize-cli": "^6.2.0"
   },
   "devDependencies": {
-<<<<<<< HEAD
-=======
-    "artillery": "^1.7.9",
->>>>>>> eungy
     "jest": "^27.3.1",
     "prettier": "^2.4.1",
     "supertest": "^6.1.6",
