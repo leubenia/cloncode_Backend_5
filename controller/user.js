@@ -87,6 +87,9 @@ exports.login = async (req, res) => {
         errorMessage: '찾으시는 아이디가 없습니다.',
       });
     }
+    console.log(user);
+    console.log(user.salt);
+    console.log(user.pw);
     //계정별 저장되어있는 salt값을 활용해서 해시화
     let salt = user.salt;
 
@@ -116,7 +119,7 @@ exports.login = async (req, res) => {
 
     console.log('-----------token----------');
     console.log(token);
-    res.send({
+    res.status(200).send({
       result: 'success',
       token: token,
       email: user.email,
