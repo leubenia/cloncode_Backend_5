@@ -274,11 +274,16 @@ router.delete('/todelepost/:postId', midware, async (req, res) => {
 router.get('/testdo/aa',midware ,async (req, res) => {
   try {
     const { user } = res.locals;
+
+    // const userId = 'SELECT posts.*,comment.comment AS `comment.comment`,`user`.`userId` AS `user.userId`, `user`.`email` AS `user.email`, `user`.`profile` AS `user.profile` FROM `posts` AS `posts` LEFT OUTER JOIN `users` AS `user` ON `posts`.`userId` = `user`.`userId` left OUTER JOIN comments AS comment ON comment.postId = posts.postId where posts.postId = 1;';
+    // const posts = await sequelize.query(userId, {
+    //   type: Sequelize.QueryTypes.SELECT,
+    // });
     const post = await posts.findAll(
-      { include: users },
-      {
-        include: comments
-    });
+      { include: [{model :comments, attributes: ['comment']},
+      { model : users , attributes: ['userId','email','profile']},
+      { model : likes }] },
+      );
     // console.log(post)
     res.send({ is: post });
   } catch (error) {

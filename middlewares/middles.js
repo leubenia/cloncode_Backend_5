@@ -6,14 +6,14 @@ module.exports = async (req, res, next) => {
   const location = 'x-auth-token';
   const token = req.headers[location];
 
-  console.log(token);
+  // console.log(token);
 
   console.log('미들웨어 사용함');
   try {
     if (token) {
       const decoded = jwt.verify(token, process.env.SECRET_KEY);
       let users;
-      console.log(decoded);
+      // console.log(decoded);
       const post = 'SELECT * FROM users WHERE email = :email';
       const results = await sequelize.query(post, {
         replacements: { email: decoded.email },
