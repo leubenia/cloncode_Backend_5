@@ -105,9 +105,11 @@ router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
     const { content } = req.body;
     if (req.file) {
       const postInfo = await posts.findOne({ where: { postId : postId, userId : user.userId } });
+      console.log(postInfo);
+      console.log("-------")
       if (postInfo) {
         const beforeImage = postInfo.image.split('/')[4];
-
+        console.log(beforeImage)
         s3.deleteObject(
           {
             Bucket: process.env.bucket,
@@ -129,8 +131,8 @@ router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
         // );
 
         const originalUrl = req.file.location;
-
-        const post = await posts.update(
+        console.log(originalUrl)
+        const post = await postInfo.update(
           {
             content: content,
             image: originalUrl,
@@ -144,7 +146,7 @@ router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
         post.likeCnt = likesget.length;
         if(user){post.like = likesget.some(like => like.userId === user.userId);}
 
-        res.send({ post: post, user: user, result: 'success' });
+        res.send({ post: post, result: 'success' });
       } else {
         res.status(400).send({ result: '게시글 수정 실패 되었습니다.' });
       }
@@ -152,8 +154,7 @@ router.patch('/:postId', midware, upload.single('image'), async (req, res) => {
       const postInfo = await posts.findOne({ where: { postId: postId, userId: user.userId } });
       if (postInfo) {
         const post = await postInfo.update({
-          content: content,
-          image: '',
+          content: content
         });
         const commentget = await cget.commentget(post.postId);
         post.dataValues.comment = commentget;
@@ -273,9 +274,6 @@ router.delete('/todelepost/:postId', midware, async (req, res) => {
     });
   }
 });
-
-
-
 
 
 
